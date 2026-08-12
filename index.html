@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediCare Pharmacy — Your Trusted Online Pharmacy</title>
+  <meta name="description" content="MediCare Pharmacy offers a wide range of genuine medicines, health products, and wellness essentials delivered to your doorstep. Licensed pharmacists. Fast delivery.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/customer.css">
+</head>
+<body>
+
+
+<!-- ═══ NAVBAR ═════════════════════════════════════════════════ -->
+<nav class="navbar navbar-expand-lg customer-navbar" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand navbar-brand-custom" href="index.html">
+      <div class="brand-icon"><i class="bi bi-capsule-pill"></i></div>
+      <span>Medi<b>Care</b></span>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav mx-auto gap-1">
+        <li class="nav-item"><a class="nav-link nav-link-custom active" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="customer/medicines.html"><i class="bi bi-capsule me-1"></i>Medicines</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="customer/orders.html"><i class="bi bi-bag-check me-1"></i>Orders</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="customer/feedback.html"><i class="bi bi-star me-1"></i>Feedback</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <!-- Search -->
+        <div class="search-bar d-none d-lg-block" style="max-width:220px">
+          <i class="bi bi-search"></i>
+          <input type="text" class="form-control" placeholder="Search medicines..." id="navSearchInput" onkeydown="if(event.key==='Enter') window.location='customer/medicines.html'">
+        </div>
+        <!-- Cart -->
+        <a href="customer/cart.html" class="cart-btn" title="Cart">
+          <i class="bi bi-cart3"></i>
+          <span class="cart-count" id="navCartCount">0</span>
+        </a>
+        <div id="homeAccountArea"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO SECTION ═══════════════════════════════════════════ -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center g-4 py-5">
+      <div class="col-lg-6 hero-content" style="animation:fadeInUp .7s ease both">
+        <div class="hero-badge">
+          <i class="bi bi-shield-check-fill text-success"></i> Trusted by 50,000+ customers across India
+        </div>
+        <h1 class="hero-title">Your Health,<br>Our <span style="background:linear-gradient(135deg,#34D399,#10B981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Priority</span></h1>
+        <p class="hero-subtitle">Order prescription &amp; OTC medicines online. Fast delivery, genuine products, and expert pharmacist support — all in one place.</p>
+
+        <!-- Hero Search Bar -->
+        <div class="hero-search-wrap mb-4">
+          <i class="bi bi-search text-muted"></i>
+          <input type="text" placeholder="Search for medicines, brands, categories..." id="heroSearch" onkeydown="if(event.key==='Enter') window.location='customer/medicines.html'">
+          <button class="hero-search-btn" onclick="window.location='customer/medicines.html'">Search</button>
+        </div>
+
+        <div class="d-flex flex-wrap gap-3">
+          <a href="customer/medicines.html" class="btn btn-secondary-custom btn-lg"><i class="bi bi-grid-3x3-gap me-2"></i>Browse Medicines</a>
+          <a href="customer/prescription.html" class="btn btn-lg" style="border:2px solid rgba(255,255,255,.4);color:#fff;border-radius:var(--radius-sm);padding:.55rem 1.4rem;font-weight:600;transition:var(--transition)" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='transparent'"><i class="bi bi-upload me-2"></i>Upload Prescription</a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="text-center">
+            <div class="hero-stat-value">10K+</div>
+            <div class="hero-stat-label">Products</div>
+          </div>
+          <div class="text-center">
+            <div class="hero-stat-value">50K+</div>
+            <div class="hero-stat-label">Customers</div>
+          </div>
+          <div class="text-center">
+            <div class="hero-stat-value">24/7</div>
+            <div class="hero-stat-label">Support</div>
+          </div>
+          <div class="text-center">
+            <div class="hero-stat-value">1hr</div>
+            <div class="hero-stat-label">Delivery</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6" style="animation:fadeInDown .7s ease .2s both">
+        <div class="hero-image-wrap">
+          <div class="hero-image-card">
+            <div class="text-center mb-3">
+              <div style="font-size:2.5rem;margin-bottom:.4rem">💊</div>
+              <h5 class="text-white fw-700 mb-0" style="font-size:.95rem">Quick Order Summary</h5>
+              <small style="color:rgba(255,255,255,.6);font-size:.72rem">3 items in your cart</small>
+            </div>
+            <div class="d-flex flex-column gap-2">
+              <div class="d-flex align-items-center gap-2 p-2 rounded" style="background:rgba(255,255,255,.1)">
+                <span style="font-size:1.4rem">💊</span>
+                <div class="flex-1">
+                  <div style="color:#fff;font-size:.85rem;font-weight:600">Paracetamol 500mg</div>
+                  <div style="color:rgba(255,255,255,.6);font-size:.72rem">MedCure • ₹45</div>
+                </div>
+                <span class="badge rounded-pill" style="background:rgba(16,185,129,.8)">2×</span>
+              </div>
+              <div class="d-flex align-items-center gap-2 p-2 rounded" style="background:rgba(255,255,255,.1)">
+                <span style="font-size:1.4rem">🌿</span>
+                <div class="flex-1">
+                  <div style="color:#fff;font-size:.85rem;font-weight:600">Vitamin D3 1000IU</div>
+                  <div style="color:rgba(255,255,255,.6);font-size:.72rem">VitaBoost • ₹299</div>
+                </div>
+                <span class="badge rounded-pill" style="background:rgba(16,185,129,.8)">1×</span>
+              </div>
+              <div class="d-flex align-items-center gap-2 p-2 rounded" style="background:rgba(255,255,255,.1)">
+                <span style="font-size:1.4rem">💉</span>
+                <div class="flex-1">
+                  <div style="color:#fff;font-size:.85rem;font-weight:600">Cetirizine 10mg</div>
+                  <div style="color:rgba(255,255,255,.6);font-size:.72rem">AllerFree • ₹35</div>
+                </div>
+                <span class="badge rounded-pill" style="background:rgba(16,185,129,.8)">1×</span>
+              </div>
+            </div>
+            <hr style="border-color:rgba(255,255,255,.2)">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span style="color:rgba(255,255,255,.7);font-size:.85rem">Total Amount</span>
+              <span style="color:#fff;font-weight:800;font-size:1.15rem">₹424.00</span>
+            </div>
+            <a href="customer/checkout.html" class="btn btn-secondary-custom w-100"><i class="bi bi-lightning-charge-fill me-1"></i>Checkout Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Account Area Script -->
+<script>
+(function () {
+  const accountArea = document.getElementById('homeAccountArea');
+  if (!accountArea) return;
+
+  const isLoggedIn = localStorage.getItem('medicare_logged_in') === 'true';
+  if (!isLoggedIn) {
+    accountArea.innerHTML = '<a href="customer/register.html" class="btn btn-primary-custom btn-sm px-3 fw-600"><i class="bi bi-person-plus me-1"></i>Register</a>';
+    return;
+  }
+
+  const userName = localStorage.getItem('medicare_user_name') || 'My Account';
+  const userEmail = localStorage.getItem('medicare_user_email') || 'user@example.com';
+  const initials = userName.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase();
+
+  accountArea.innerHTML = `
+    <div class="dropdown">
+      <button class="btn btn-sm d-flex align-items-center gap-2 border-0 p-0" type="button" data-bs-toggle="dropdown">
+        <div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">${initials || 'P'}</div>
+        <i class="bi bi-chevron-down text-muted small"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius:14px;min-width:210px;border:1px solid var(--gray-200) !important">
+        <li><div class="px-3 py-2 border-bottom"><strong style="font-size:.9rem">${userName}</strong><br><small class="text-muted">${userEmail}</small></div></li>
+        <li><a class="dropdown-item py-2" href="customer/profile.html"><i class="bi bi-person me-2 text-primary"></i>My Profile</a></li>
+        <li><a class="dropdown-item py-2" href="customer/orders.html"><i class="bi bi-bag me-2 text-primary"></i>My Orders</a></li>
+        <li><a class="dropdown-item py-2" href="customer/prescription.html"><i class="bi bi-file-medical me-2 text-primary"></i>Prescriptions</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item py-2 text-danger" href="customer/login.html" id="logoutLink"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+      </ul>
+    </div>`;
+
+  const logoutLink = document.getElementById('logoutLink');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', () => {
+      localStorage.removeItem('medicare_logged_in');
+      localStorage.removeItem('medicare_user_name');
+      localStorage.removeItem('medicare_user_email');
+    });
+  }
+})();
+</script>
+
+<!-- ═══ TRUST BADGES ════════════════════════════════════════════ -->
+<section class="trust-badge-bar">
+  <div class="container">
+    <div class="row g-3 justify-content-center">
+      <div class="col-6 col-md-3">
+        <div class="trust-badge">
+          <div class="trust-badge-icon" style="background:rgba(34,197,94,.1);color:var(--success)"><i class="bi bi-patch-check-fill"></i></div>
+          <div>
+            <div class="trust-badge-text">100% Genuine</div>
+            <div class="trust-badge-sub">Licensed medicines only</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="trust-badge">
+          <div class="trust-badge-icon" style="background:rgba(37,99,235,.1);color:var(--primary)"><i class="bi bi-truck"></i></div>
+          <div>
+            <div class="trust-badge-text">Express Delivery</div>
+            <div class="trust-badge-sub">Same-day & next-day</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="trust-badge">
+          <div class="trust-badge-icon" style="background:rgba(245,158,11,.1);color:var(--warning)"><i class="bi bi-shield-lock-fill"></i></div>
+          <div>
+            <div class="trust-badge-text">Secure Payment</div>
+            <div class="trust-badge-sub">256-bit SSL encryption</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="trust-badge">
+          <div class="trust-badge-icon" style="background:rgba(6,182,212,.1);color:var(--info)"><i class="bi bi-headset"></i></div>
+          <div>
+            <div class="trust-badge-text">24/7 Support</div>
+            <div class="trust-badge-sub">Expert pharmacists online</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CATEGORIES ══════════════════════════════════════════════ -->
+<section class="section-padding" id="categories" style="background:var(--bg)">
+  <div class="container">
+    <div class="section-heading anim-fade-up">
+      <h2>Shop by <span class="gradient-text">Category</span></h2>
+      <p>Browse our wide range of medicines and health products across popular categories</p>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-3" id="categoriesGrid"></div>
+  </div>
+</section>
+
+<!-- ═══ FEATURED MEDICINES ════════════════════════════════════== -->
+<section class="section-padding" style="background:#fff">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+      <div>
+        <h2 class="fw-700 mb-1">Featured <span class="gradient-text">Medicines</span></h2>
+        <p class="text-muted mb-0" style="font-size:.92rem">Hand-picked bestsellers for your wellness</p>
+      </div>
+      <a href="customer/medicines.html" class="btn btn-outline-primary-custom gap-2"><i class="bi bi-grid"></i> View All</a>
+    </div>
+    <div class="row g-3" id="featuredGrid"></div>
+    <!-- Mobile View All -->
+    <div class="text-center mt-4 d-md-none">
+      <a href="customer/medicines.html" class="btn btn-outline-primary-custom"><i class="bi bi-grid me-2"></i>View All Medicines</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SPECIAL OFFER BANNERS ══════════════════════════════════ -->
+<section class="py-5" style="background:var(--bg)">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-6 anim-fade-up">
+        <div class="offer-banner" style="background:linear-gradient(135deg,#1D4ED8,#2563EB,#0891B2)">
+          <div>
+            <div class="mb-1" style="font-size:.82rem;opacity:.8;font-weight:600;font-family:var(--font-main)">LIMITED TIME OFFER</div>
+            <h4 class="fw-800 mb-2">🎉 Get 25% OFF</h4>
+            <p class="mb-0">On all vitamins &amp; supplements this month. Use code <strong>HEALTH25</strong></p>
+          </div>
+          <a href="customer/medicines.html" class="btn btn-light mt-3">Shop Now <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+      <div class="col-md-6 anim-fade-up">
+        <div class="offer-banner" style="background:linear-gradient(135deg,#059669,#10B981,#34D399)">
+          <div>
+            <div class="mb-1" style="font-size:.82rem;opacity:.8;font-weight:600;font-family:var(--font-main)">FREE SERVICE</div>
+            <h4 class="fw-800 mb-2">📋 Free Consultation</h4>
+            <p class="mb-0">Upload your prescription and get free pharmacist consultation with every order over ₹500</p>
+          </div>
+          <a href="customer/prescription.html" class="btn btn-light mt-3">Upload Now <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHY CHOOSE US (LIGHT BACKGROUND) ════════════════════════ -->
+<section class="section-padding" style="background:#fff">
+  <div class="container">
+    <div class="section-heading anim-fade-up">
+      <h2>Why <span class="gradient-text">Choose Us?</span></h2>
+      <p>We're committed to your health and well-being with every order</p>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-3 mt-2">
+      <div class="col-md-4 col-sm-6 anim-fade-up">
+        <div class="why-card">
+          <div class="why-icon" style="color:var(--primary)"><i class="bi bi-prescription2" style="font-size:1.6rem;color:var(--primary)"></i></div>
+          <h5 class="fw-700 mb-2" style="font-size:1rem">Licensed Pharmacists</h5>
+          <p class="text-muted mb-0" style="font-size:.88rem">Every prescription is verified by certified pharmacists before dispensing</p>
+        </div>
+      </div>
+      <div class="col-md-4 col-sm-6 anim-fade-up">
+        <div class="why-card">
+          <div class="why-icon"><i class="bi bi-lightning-charge-fill" style="font-size:1.6rem;color:var(--warning)"></i></div>
+          <h5 class="fw-700 mb-2" style="font-size:1rem">Same Day Delivery</h5>
+          <p class="text-muted mb-0" style="font-size:.88rem">Order before 2 PM and get your medicines delivered the same day</p>
+        </div>
+      </div>
+      <div class="col-md-4 col-sm-6 anim-fade-up">
+        <div class="why-card">
+          <div class="why-icon"><i class="bi bi-tags-fill" style="font-size:1.6rem;color:var(--success)"></i></div>
+          <h5 class="fw-700 mb-2" style="font-size:1rem">Best Prices</h5>
+          <p class="text-muted mb-0" style="font-size:.88rem">We guarantee the lowest prices on all medicines with exclusive discounts</p>
+        </div>
+      </div>
+      <div class="col-md-4 col-sm-6 anim-fade-up">
+        <div class="why-card">
+          <div class="why-icon"><i class="bi bi-shield-fill-check" style="font-size:1.6rem;color:var(--info)"></i></div>
+          <h5 class="fw-700 mb-2" style="font-size:1rem">Secure &amp; Private</h5>
+          <p class="text-muted mb-0" style="font-size:.88rem">Your health data and orders are 100% secure and confidential</p>
+        </div>
+      </div>
+      <div class="col-md-4 col-sm-6 anim-fade-up">
+        <div class="why-card">
+          <div class="why-icon"><i class="bi bi-arrow-repeat" style="font-size:1.6rem;color:#8B5CF6"></i></div>
+          <h5 class="fw-700 mb-2" style="font-size:1rem">Easy Returns</h5>
+          <p class="text-muted mb-0" style="font-size:.88rem">Hassle-free returns and refunds within 7 days of delivery</p>
+        </div>
+      </div>
+      <div class="col-md-4 col-sm-6 anim-fade-up">
+        <div class="why-card">
+          <div class="why-icon"><i class="bi bi-phone-fill" style="font-size:1.6rem;color:#EC4899"></i></div>
+          <h5 class="fw-700 mb-2" style="font-size:1rem">Easy to Order</h5>
+          <p class="text-muted mb-0" style="font-size:.88rem">Simple, intuitive interface to find and order medicines in just 3 clicks</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS ════════════════════════════════════════════ -->
+<section class="section-padding" style="background:var(--bg)">
+  <div class="container">
+    <div class="section-heading anim-fade-up">
+      <h2>What Our <span class="gradient-text">Customers Say</span></h2>
+      <p>Trusted by thousands of happy customers across India</p>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4 anim-fade-up">
+        <div class="testimonial-card">
+          <p class="testimonial-text">"Absolutely fantastic service! Got my medicines delivered within an hour. The pharmacist even called to confirm the dosage. Highly recommended!"</p>
+          <div class="testimonial-author">
+            <div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">PS</div>
+            <div>
+              <div class="testimonial-name">Priya Sharma</div>
+              <div class="testimonial-role">Regular Customer • Mumbai</div>
+            </div>
+          </div>
+          <div class="mt-2 star-rating">
+            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 anim-fade-up">
+        <div class="testimonial-card">
+          <p class="testimonial-text">"The prescription upload feature is a game-changer. I just photograph my doctor's prescription and the medicines arrive the same day!"</p>
+          <div class="testimonial-author">
+            <div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--success),#16A34A)">RM</div>
+            <div>
+              <div class="testimonial-name">Rahul Mehta</div>
+              <div class="testimonial-role">Verified Customer • Delhi</div>
+            </div>
+          </div>
+          <div class="mt-2 star-rating">
+            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 anim-fade-up">
+        <div class="testimonial-card">
+          <p class="testimonial-text">"Best prices I've found anywhere online! Saved 30% on my monthly medicines. The quality is exactly the same as from the local pharmacy."</p>
+          <div class="testimonial-author">
+            <div class="avatar avatar-md" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED)">AS</div>
+            <div>
+              <div class="testimonial-name">Anita Singh</div>
+              <div class="testimonial-role">Premium Member • Pune</div>
+            </div>
+          </div>
+          <div class="mt-2 star-rating">
+            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NEWSLETTER BANNER ════════════════════════════════════════ -->
+<section class="py-5" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">
+  <div class="container text-center text-white">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="mb-2" style="font-size:.82rem;opacity:.8;font-weight:700;letter-spacing:.5px;text-transform:uppercase">STAY CONNECTED</div>
+        <h3 class="fw-800 mb-2">Stay Healthy, Stay Informed</h3>
+        <p style="opacity:.8;margin-bottom:1.8rem;font-size:.95rem">Subscribe to get health tips, exclusive offers, and medicine reminders delivered to your inbox.</p>
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+          <div class="input-group" style="max-width:480px">
+            <input type="email" class="form-control border-0" placeholder="Enter your email address..." style="border-radius:var(--radius-full) 0 0 var(--radius-full) !important;padding:.75rem 1.2rem;font-family:var(--font-main)">
+            <button class="btn fw-700" style="background:#0F172A;color:#fff;border-radius:0 var(--radius-full) var(--radius-full) 0;padding:.75rem 1.5rem;font-family:var(--font-main)" onclick="showToast('Subscribed successfully! 🎉','success')">Subscribe <i class="bi bi-send ms-1"></i></button>
+          </div>
+        </div>
+        <div class="mt-3" style="font-size:.78rem;opacity:.65"><i class="bi bi-lock-fill me-1"></i>No spam, ever. Unsubscribe at any time.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══════════════════════════════════════════════════ -->
+<footer class="customer-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="footer-brand">
+          <div class="footer-brand-icon"><i class="bi bi-capsule-pill"></i></div>
+          MediCare Pharmacy
+        </div>
+        <p class="footer-desc">Your trusted online pharmacy delivering genuine medicines and healthcare products with care and convenience across India.</p>
+        <div class="social-icons">
+          <a href="#" class="social-icon" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="social-icon" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" class="social-icon" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="social-icon" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+          <a href="#" class="social-icon" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 class="footer-heading">Quick Links</h6>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="customer/medicines.html">Medicines</a></li>
+          <li><a href="#categories">Categories</a></li>
+          <li><a href="customer/orders.html">My Orders</a></li>
+          <li><a href="customer/prescription.html">Prescription</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 class="footer-heading">Support</h6>
+        <ul class="footer-links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4">
+        <h6 class="footer-heading">Contact Info</h6>
+        <div class="d-flex flex-column">
+          <div class="footer-contact-item"><i class="bi bi-geo-alt-fill"></i><span>123 Health Street, Andheri West, Mumbai, MH 400053</span></div>
+          <div class="footer-contact-item"><i class="bi bi-telephone-fill"></i><span>+91 98765 43210</span></div>
+          <div class="footer-contact-item"><i class="bi bi-envelope-fill"></i><span>support@medicare-pharma.com</span></div>
+          <div class="footer-contact-item"><i class="bi bi-clock-fill"></i><span>Mon–Sat: 9 AM – 8 PM | Sun: 10 AM – 6 PM</span></div>
+        </div>
+        <!-- Portals -->
+        <div class="mt-3 d-flex gap-2 flex-wrap">
+          <a href="admin/dashboard.html" class="btn btn-sm fw-600" style="background:rgba(139,92,246,.15);color:#7C3AED;border:1px solid rgba(139,92,246,.25);border-radius:var(--radius-full)"><i class="bi bi-shield-lock me-1"></i>Admin</a>
+          <a href="pharmacist/dashboard.html" class="btn btn-sm fw-600" style="background:rgba(37,99,235,.15);color:var(--primary);border:1px solid rgba(37,99,235,.25);border-radius:var(--radius-full)"><i class="bi bi-person-badge me-1"></i>Pharmacist</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div class="footer-bottom-text">© 2024 MediCare Pharmacy. All rights reserved. | Licensed by Drug Control Authority India</div>
+      <div class="footer-bottom-text">GSTIN: 27AABCU9603R1ZN | Drug Lic: MH-MUM-2024-0847</div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ BACK TO TOP ════════════════════════════════════════════= -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="bi bi-arrow-up"></i>
+</button>
+
+<!-- ═══ TOAST CONTAINER ════════════════════════════════════════= -->
+<div id="toast-container"></div>
+
+<!-- ═══ SCRIPTS ════════════════════════════════════════════════= -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+// Back to top
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backToTop');
+  if (btn) btn.classList.toggle('visible', window.scrollY > 300);
+});
+
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('mainNav');
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 10);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Render Categories
+  const catGrid = document.getElementById('categoriesGrid');
+  const catColors = ['#EF4444','#F59E0B','#10B981','#2563EB','#8B5CF6','#14B8A6','#F97316','#06B6D4'];
+  const catBg = ['rgba(239,68,68,.1)','rgba(245,158,11,.1)','rgba(16,185,129,.1)','rgba(37,99,235,.1)','rgba(139,92,246,.1)','rgba(20,184,166,.1)','rgba(249,115,22,.1)','rgba(6,182,212,.1)'];
+  DummyData.categories.forEach((cat, i) => {
+    catGrid.innerHTML += `
+      <div class="col-6 col-md-3 col-lg-3 anim-fade-up">
+        <a href="customer/medicines.html?cat=${cat.name}" class="category-card">
+          <div class="category-icon" style="background:${catBg[i]};color:${catColors[i]}">
+            <span style="font-size:1.8rem">${cat.icon}</span>
+          </div>
+          <h6 class="fw-600 mb-1" style="font-size:.9rem">${cat.name}</h6>
+          <span class="category-count">${cat.count} products</span>
+        </a>
+      </div>`;
+  });
+
+  // Render Featured Medicines
+  const featGrid = document.getElementById('featuredGrid');
+  DummyData.medicines.slice(0, 8).forEach(med => {
+    featGrid.innerHTML += `
+      <div class="col-6 col-md-4 col-lg-3 anim-fade-up">
+        <div class="medicine-card">
+          <div class="medicine-img-wrap">
+            <span style="font-size:3rem">${med.img}</span>
+            <div class="medicine-badge-overlay">
+              <span class="price-discount">-${med.discount}%</span>
+            </div>
+            <button class="medicine-wishlist" onclick="toggleWishlist(this)" title="Wishlist">
+              <i class="bi bi-heart"></i>
+            </button>
+            ${med.rxRequired ? '<span class="badge bg-danger position-absolute bottom-0 start-0 m-2" style="font-size:.62rem;letter-spacing:.3px">Rx</span>' : ''}
+          </div>
+          <div class="medicine-body">
+            <div class="medicine-brand">${med.brand}</div>
+            <div class="medicine-name">${med.name}</div>
+            <div class="mb-1">
+              <span class="star-rating" style="font-size:.75rem">
+                ${'<i class="bi bi-star-fill"></i>'.repeat(Math.floor(med.rating))}
+              </span>
+              <small class="text-muted" style="font-size:.72rem">(${med.rating})</small>
+            </div>
+            <div>
+              <span class="price-tag">₹${med.price}</span>
+              <span class="price-old ms-1">₹${med.oldPrice}</span>
+            </div>
+          </div>
+          <div class="medicine-footer">
+            <span class="stock-indicator stock-in-stock">
+              <span class="stock-dot"></span>In Stock
+            </span>
+            <button class="add-cart-btn" onclick="addToCart(${med.id})">
+              <i class="bi bi-cart-plus"></i> Add
+            </button>
+          </div>
+        </div>
+      </div>`;
+  });
+  initScrollAnimations();
+});
+
+function toggleWishlist(btn) {
+  btn.classList.toggle('active');
+  const icon = btn.querySelector('i');
+  if (btn.classList.contains('active')) {
+    icon.className = 'bi bi-heart-fill';
+    showToast('Added to wishlist!', 'info');
+  } else {
+    icon.className = 'bi bi-heart';
+  }
+}
+
+function addToCart(id) {
+  const med = DummyData.medicines.find(m => m.id === id);
+  if (med) {
+    Cart.add({ id: med.id, name: med.name, price: med.price, img: med.img, brand: med.brand });
+  }
+}
+</script>
+</body>
+</html>

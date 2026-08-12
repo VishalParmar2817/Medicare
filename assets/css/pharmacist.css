@@ -1,0 +1,440 @@
+/* ============================================================
+   PHARMACIST MODULE CSS — Module-specific overrides only
+   Base sidebar/layout styles are in main.css
+   ============================================================ */
+
+/* ── Inventory Tags ────────────────────────────────────────── */
+.expiry-warn  { color: var(--warning); font-weight: 600; font-size: .82rem; }
+.expiry-ok    { color: var(--success); font-weight: 600; font-size: .82rem; }
+.expiry-exp   { color: var(--danger);  font-weight: 600; font-size: .82rem; }
+
+/* Stock quantity color cells */
+.stock-qty-ok      { color: var(--success); font-weight: 700; }
+.stock-qty-low     { color: var(--warning); font-weight: 700; }
+.stock-qty-out     { color: var(--danger);  font-weight: 700; }
+.stock-qty-cell-ok   { background: rgba(34,197,94,.07); }
+.stock-qty-cell-low  { background: rgba(245,158,11,.07); }
+.stock-qty-cell-out  { background: rgba(239,68,68,.07); }
+
+/* ── Stock Alert Summary Bar ───────────────────────────────── */
+.inventory-alert-strip {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.inv-alert-chip {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .75rem 1.2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  font-size: .85rem;
+  font-weight: 600;
+  font-family: var(--font-main);
+  flex: 1;
+  min-width: 180px;
+}
+.inv-alert-chip.low  { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.25); color: #92400E; }
+.inv-alert-chip.exp  { background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.25); color: #B91C1C; }
+.inv-alert-chip.near { background: rgba(6,182,212,.08); border-color: rgba(6,182,212,.25); color: #164E63; }
+.inv-alert-chip i    { font-size: 1.2rem; }
+.inv-alert-number    { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+.inv-alert-label     { font-size: .75rem; font-weight: 500; opacity: .8; }
+
+/* ── Invoice ───────────────────────────────────────────────── */
+.invoice-wrap {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-md);
+  max-width: 820px;
+  margin: 0 auto;
+  border: 1px solid var(--gray-200);
+}
+.invoice-header {
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid var(--primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.invoice-brand { display: flex; align-items: center; gap: .75rem; }
+.invoice-brand-icon {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.4rem;
+}
+.invoice-title  { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+.invoice-number { font-size: .85rem; color: var(--gray-400); font-family: var(--font-main); }
+.invoice-table  { width: 100%; font-size: .88rem; border-collapse: collapse; }
+.invoice-table th {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  padding: .75rem 1rem;
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.invoice-table th:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.invoice-table th:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.invoice-table td {
+  padding: .7rem 1rem;
+  border-bottom: 1px solid var(--gray-100);
+  font-family: var(--font-main);
+  color: var(--dark-2);
+}
+.invoice-total  { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+.invoice-stamp  {
+  border: 3px solid var(--success);
+  color: var(--success);
+  border-radius: var(--radius-sm);
+  padding: .3rem .85rem;
+  font-weight: 800;
+  font-size: .82rem;
+  transform: rotate(-10deg);
+  display: inline-block;
+  font-family: var(--font-main);
+  letter-spacing: .5px;
+}
+.invoice-footer-note {
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: .75rem 1rem;
+  font-size: .8rem;
+  color: var(--dark-3);
+  font-family: var(--font-main);
+  margin-top: 1.5rem;
+  border-left: 3px solid var(--primary);
+}
+
+/* Print styles for invoice */
+@media print {
+  .invoice-wrap { box-shadow: none; border: none; padding: 1rem; }
+  .no-print { display: none !important; }
+  .invoice-header { border-bottom: 2px solid var(--primary); }
+}
+
+/* ── Prescription & Billing Page ───────────────────────────── */
+/* Workflow Steps */
+.rx-workflow-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 1.2rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+.rx-workflow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  flex: 1;
+  min-width: 90px;
+  position: relative;
+}
+.rx-workflow-step::after {
+  content: '';
+  position: absolute;
+  top: 19px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--gray-200);
+}
+.rx-workflow-step:last-child::after { display: none; }
+.rx-step-circle {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-200);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .9rem;
+  position: relative;
+  z-index: 1;
+  transition: var(--transition-fast);
+  color: var(--gray-400);
+}
+.rx-workflow-step.done   .rx-step-circle { border-color: var(--success); background: var(--success); color: #fff; }
+.rx-workflow-step.active .rx-step-circle { border-color: var(--primary); background: var(--primary); color: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,.15); }
+.rx-step-label {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-align: center;
+  font-family: var(--font-main);
+}
+.rx-workflow-step.active .rx-step-label { color: var(--primary); }
+.rx-workflow-step.done   .rx-step-label { color: var(--success); }
+
+/* Prescription Card */
+.rx-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+  height: 100%;
+}
+.rx-card-header {
+  padding: 1rem 1.3rem;
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rx-card-title { font-weight: 700; font-size: .95rem; color: var(--dark); margin: 0; }
+.rx-card-body  { padding: 1.3rem; }
+
+/* Prescription Image Viewer */
+.rx-image-viewer {
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  aspect-ratio: 3/4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 2px dashed var(--gray-300);
+  cursor: zoom-in;
+  position: relative;
+}
+.rx-image-viewer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.rx-image-viewer .rx-zoom-hint {
+  position: absolute;
+  bottom: .75rem;
+  right: .75rem;
+  background: rgba(0,0,0,.6);
+  color: #fff;
+  padding: .3rem .65rem;
+  border-radius: var(--radius-full);
+  font-size: .72rem;
+  font-weight: 600;
+  font-family: var(--font-main);
+}
+
+.rx-placeholder {
+  text-align: center;
+  color: var(--gray-400);
+  padding: 2rem;
+}
+.rx-placeholder i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+
+/* Customer Details Panel */
+.customer-info-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid var(--gray-100);
+  font-size: .88rem;
+  font-family: var(--font-main);
+}
+.customer-info-row:last-child { border-bottom: none; }
+.customer-info-label { color: var(--gray-400); font-size: .8rem; min-width: 110px; }
+.customer-info-value { font-weight: 600; color: var(--dark); }
+
+/* Approve / Reject buttons */
+.rx-action-approve {
+  background: linear-gradient(135deg, var(--success), #16A34A);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: .75rem 1.5rem;
+  font-weight: 700;
+  font-size: .9rem;
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.rx-action-approve:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(34,197,94,.4); }
+
+.rx-action-reject {
+  background: #fff;
+  color: var(--danger);
+  border: 2px solid var(--danger);
+  border-radius: var(--radius-md);
+  padding: .7rem 1.5rem;
+  font-weight: 700;
+  font-size: .9rem;
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.rx-action-reject:hover { background: var(--danger); color: #fff; }
+
+/* Medicine Selection Table (billing) */
+.bill-medicine-row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
+  margin-bottom: .5rem;
+  transition: var(--transition-fast);
+  background: #fff;
+  font-family: var(--font-main);
+}
+.bill-medicine-row:hover { border-color: var(--primary); background: rgba(37,99,235,.02); }
+.bill-medicine-name { font-weight: 600; font-size: .88rem; color: var(--dark); flex: 1; }
+.bill-medicine-price { font-weight: 700; color: var(--primary); font-size: .9rem; min-width: 70px; text-align: right; }
+
+/* Bill Summary */
+.bill-summary-card {
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  border-radius: var(--radius-lg);
+  padding: 1.3rem;
+  border: 1px solid rgba(37,99,235,.15);
+}
+.bill-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: .88rem;
+  padding: .45rem 0;
+  border-bottom: 1px solid rgba(37,99,235,.08);
+  font-family: var(--font-main);
+  color: var(--dark-2);
+}
+.bill-summary-row:last-child { border-bottom: none; }
+.bill-summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--primary);
+  padding-top: .65rem;
+  margin-top: .5rem;
+  border-top: 2px solid rgba(37,99,235,.2);
+  font-family: var(--font-main);
+}
+
+/* ── Prescription Image Thumbnail ──────────────────────────── */
+.prescription-img-thumb {
+  width: 80px; height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 2px solid var(--gray-200);
+  transition: var(--transition-fast);
+}
+.prescription-img-thumb:hover { border-color: var(--primary); transform: scale(1.05); }
+
+/* ── Status Pipeline Filter (Order Management) ─────────────── */
+.status-pipeline {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.status-pipe-btn {
+  padding: .45rem 1rem;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--gray-200);
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  color: var(--dark-3);
+  background: #fff;
+  font-family: var(--font-main);
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.status-pipe-btn:hover   { border-color: var(--primary); color: var(--primary); background: rgba(37,99,235,.04); }
+.status-pipe-btn.active  { background: var(--primary); border-color: var(--primary); color: #fff; }
+.status-pipe-btn .pipe-count {
+  background: rgba(255,255,255,.3);
+  border-radius: var(--radius-full);
+  padding: .1em .45em;
+  font-size: .7rem;
+}
+.status-pipe-btn:not(.active) .pipe-count {
+  background: var(--gray-100);
+  color: var(--dark-3);
+}
+
+/* ── Medicine Management ───────────────────────────────────── */
+.med-form-section {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  margin-bottom: 1.5rem;
+}
+.med-form-section-title {
+  font-weight: 700;
+  font-size: .88rem;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--dark-3);
+  margin-bottom: 1.2rem;
+  padding-bottom: .75rem;
+  border-bottom: 2px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.med-form-section-title i { color: var(--primary); }
+
+/* ── Pharmacist Profile Card ───────────────────────────────── */
+.ph-profile-header {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  color: #fff;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.ph-profile-header::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -50px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.07);
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .invoice-wrap { padding: 1.5rem; }
+  .rx-workflow-steps { padding: 1rem; }
+  .inventory-alert-strip { flex-direction: column; }
+  .inv-alert-chip { min-width: unset; }
+}
+
+@media (max-width: 576px) {
+  .rx-workflow-step .rx-step-label { font-size: .65rem; }
+  .rx-workflow-step { min-width: 70px; }
+}

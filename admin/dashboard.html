@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — Admin Panel | MediCare</title>
+  <meta name="description" content="MediCare Admin Dashboard — Overview of pharmacy operations, sales, orders, and system health.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="admin-layout">
+
+<!-- ══ SIDEBAR ═══════════════════════════════════════════════ -->
+<div id="sidebarMount"></div>
+
+<!-- ══ MAIN ══════════════════════════════════════════════════ -->
+<div class="admin-main">
+  <div id="headerMount"></div>
+
+  <div class="admin-content">
+
+    <!-- Welcome Banner -->
+    <div class="admin-welcome-banner mb-4">
+      <div class="row align-items-center">
+        <div class="col welcome-text">
+          <div class="welcome-time" id="welcomeTime">Good Morning</div>
+          <div class="welcome-name">Welcome back, Super Admin! 👋</div>
+          <div class="welcome-sub">Here's your pharmacy system overview for today</div>
+        </div>
+        <div class="col-auto d-flex gap-2 position-relative" style="z-index:1">
+          <button class="btn btn-light fw-700" style="border-radius:var(--radius-sm);font-size:.85rem" onclick="showToast('Generating report...','info')">
+            <i class="bi bi-download me-1"></i>Export Report
+          </button>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:var(--radius-sm);font-size:.85rem">
+            <i class="bi bi-calendar3 me-1"></i>Today
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="fw-700" style="font-size:.88rem;color:var(--dark-3)">QUICK ACTIONS</span>
+        </div>
+        <div class="row g-2">
+          <div class="col-6 col-md-3 col-lg"><a href="medicines.html" class="quick-action-btn w-100"><i class="bi bi-plus-circle-fill" style="color:var(--primary)"></i>Add Medicine</a></div>
+          <div class="col-6 col-md-3 col-lg"><a href="customers.html" class="quick-action-btn w-100"><i class="bi bi-person-plus-fill" style="color:var(--success)"></i>New Customer</a></div>
+          <div class="col-6 col-md-3 col-lg"><a href="orders.html" class="quick-action-btn w-100"><i class="bi bi-bag-plus-fill" style="color:var(--warning)"></i>View Orders</a></div>
+          <div class="col-6 col-md-3 col-lg"><a href="reports.html" class="quick-action-btn w-100"><i class="bi bi-graph-up-arrow" style="color:#8B5CF6"></i>Reports</a></div>
+          <div class="col-6 col-md-3 col-lg"><a href="pharmacists.html" class="quick-action-btn w-100"><i class="bi bi-person-badge-fill" style="color:var(--info)"></i>Pharmacists</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 1 — Key Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-purple">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+            <span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>+12%</span>
+          </div>
+          <div class="stat-value" id="statCustomers">0</div>
+          <div class="stat-label">Total Customers</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-blue">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="stat-icon"><i class="bi bi-person-badge-fill"></i></div>
+            <span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>+2</span>
+          </div>
+          <div class="stat-value" id="statPharmacists">0</div>
+          <div class="stat-label">Pharmacists</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-green">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="stat-icon"><i class="bi bi-capsule-pill"></i></div>
+            <span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>+8%</span>
+          </div>
+          <div class="stat-value" id="statMedicines">0</div>
+          <div class="stat-label">Total Medicines</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-cyan">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
+            <span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>+18%</span>
+          </div>
+          <div class="stat-value">₹2.4L</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2 — Secondary Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-orange">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="stat-icon"><i class="bi bi-bag-check-fill"></i></div>
+            <span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>+5%</span>
+          </div>
+          <div class="stat-value" id="statOrders">0</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-teal">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="stat-icon"><i class="bi bi-building"></i></div>
+            <span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>+3</span>
+          </div>
+          <div class="stat-value" id="statBrands">0</div>
+          <div class="stat-label">Active Brands</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-red">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <span class="stat-trend">Action Needed</span>
+          </div>
+          <div class="stat-value" id="statAlerts">0</div>
+          <div class="stat-label">Stock Alerts</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-pink">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="stat-icon"><i class="bi bi-star-fill"></i></div>
+            <span class="stat-trend">Excellent</span>
+          </div>
+          <div class="stat-value">4.7</div>
+          <div class="stat-label">Avg Rating</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-lg-8">
+        <div class="chart-container">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <div>
+              <div class="chart-title mb-0">Revenue Overview</div>
+              <div class="chart-subtitle">Last 7 days performance</div>
+            </div>
+            <div class="period-selector">
+              <button class="period-btn active">7D</button>
+              <button class="period-btn">30D</button>
+              <button class="period-btn">3M</button>
+            </div>
+          </div>
+          <canvas id="revenueChart" height="100"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="chart-container">
+          <div class="chart-title">Users by Role</div>
+          <canvas id="usersChart"></canvas>
+          <div class="d-flex flex-column gap-2 mt-3">
+            <div class="d-flex align-items-center justify-content-between" style="font-size:.82rem">
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10B981;margin-right:6px"></span>Customers</span>
+              <span class="fw-600" id="roleCustomers">0</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between" style="font-size:.82rem">
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2563EB;margin-right:6px"></span>Pharmacists</span>
+              <span class="fw-600" id="rolePharmacists">0</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between" style="font-size:.82rem">
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#8B5CF6;margin-right:6px"></span>Admins</span>
+              <span class="fw-600">2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders + Activity Feed -->
+    <div class="row g-3 mb-4">
+      <div class="col-lg-8">
+        <div class="data-card">
+          <div class="data-card-header">
+            <div class="data-card-title"><i class="bi bi-bag-check me-2 text-primary"></i>Recent Orders</div>
+            <a href="orders.html" class="btn btn-sm btn-outline-primary-custom fw-600">View All</a>
+          </div>
+          <div class="table-wrap">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="data-card">
+          <div class="data-card-header">
+            <div class="data-card-title"><i class="bi bi-clock-history me-2 text-primary"></i>Activity Feed</div>
+          </div>
+          <div class="p-3">
+            <div class="activity-item">
+              <div class="activity-icon" style="background:rgba(34,197,94,.12);color:#16A34A"><i class="bi bi-check-circle-fill"></i></div>
+              <div class="activity-content"><div class="activity-text"><strong>Order #ORD-1042</strong> was delivered successfully</div><div class="activity-time"><i class="bi bi-clock me-1"></i>2 minutes ago</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon" style="background:rgba(37,99,235,.12);color:var(--primary)"><i class="bi bi-person-plus-fill"></i></div>
+              <div class="activity-content"><div class="activity-text">New customer <strong>Neha Gupta</strong> registered</div><div class="activity-time"><i class="bi bi-clock me-1"></i>15 minutes ago</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon" style="background:rgba(245,158,11,.12);color:#D97706"><i class="bi bi-exclamation-triangle-fill"></i></div>
+              <div class="activity-content"><div class="activity-text"><strong>Salbutamol Inhaler</strong> is running low on stock</div><div class="activity-time"><i class="bi bi-clock me-1"></i>1 hour ago</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon" style="background:rgba(139,92,246,.12);color:#7C3AED"><i class="bi bi-file-medical-fill"></i></div>
+              <div class="activity-content"><div class="activity-text">Prescription <strong>#RX-0087</strong> verified by Dr. Sneha</div><div class="activity-time"><i class="bi bi-clock me-1"></i>2 hours ago</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon" style="background:rgba(239,68,68,.12);color:#DC2626"><i class="bi bi-capsule-pill"></i></div>
+              <div class="activity-content"><div class="activity-text"><strong>Penicillin 250mg</strong> batch expired — action needed</div><div class="activity-time"><i class="bi bi-clock me-1"></i>3 hours ago</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon" style="background:rgba(6,182,212,.12);color:#0891B2"><i class="bi bi-box-seam-fill"></i></div>
+              <div class="activity-content"><div class="activity-text">New stock added: <strong>Vitamin D3</strong> (+200 units)</div><div class="activity-time"><i class="bi bi-clock me-1"></i>5 hours ago</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Low Stock & Expired Alerts -->
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="data-card">
+          <div class="data-card-header">
+            <div class="data-card-title"><i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>Low Stock Medicines</div>
+            <a href="../pharmacist/inventory.html" class="btn btn-sm btn-outline-primary-custom">View Inventory</a>
+          </div>
+          <div class="p-3 d-flex flex-column gap-2">
+            <div class="stock-alert-card low">
+              <div class="d-flex align-items-center gap-2 flex-1">
+                <div class="avatar avatar-sm" style="background:rgba(245,158,11,.15);color:var(--warning)"><i class="bi bi-capsule"></i></div>
+                <div><div class="fw-600" style="font-size:.85rem">Salbutamol Inhaler</div><small class="text-muted">Current: 30 | Min required: 50</small></div>
+              </div>
+              <span class="badge-custom badge-warning">Low Stock</span>
+            </div>
+            <div class="stock-alert-card low">
+              <div class="d-flex align-items-center gap-2 flex-1">
+                <div class="avatar avatar-sm" style="background:rgba(245,158,11,.15);color:var(--warning)"><i class="bi bi-capsule"></i></div>
+                <div><div class="fw-600" style="font-size:.85rem">Atorvastatin 20mg</div><small class="text-muted">Current: 45 | Min required: 60</small></div>
+              </div>
+              <span class="badge-custom badge-warning">Low Stock</span>
+            </div>
+            <div class="stock-alert-card near">
+              <div class="d-flex align-items-center gap-2 flex-1">
+                <div class="avatar avatar-sm" style="background:rgba(6,182,212,.15);color:var(--info)"><i class="bi bi-capsule"></i></div>
+                <div><div class="fw-600" style="font-size:.85rem">Doxycycline 100mg</div><small class="text-muted">Expires in 21 days</small></div>
+              </div>
+              <span class="badge-custom badge-info">Near Expiry</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="data-card">
+          <div class="data-card-header">
+            <div class="data-card-title"><i class="bi bi-calendar-x-fill me-2 text-danger"></i>Expired Medicines</div>
+            <button class="btn btn-sm btn-danger-custom" onclick="showToast('Removing expired stock...','warning')">Remove All</button>
+          </div>
+          <div class="p-3 d-flex flex-column gap-2">
+            <div class="stock-alert-card exp">
+              <div class="d-flex align-items-center gap-2 flex-1">
+                <div class="avatar avatar-sm" style="background:rgba(239,68,68,.15);color:var(--danger)"><i class="bi bi-capsule-pill"></i></div>
+                <div><div class="fw-600" style="font-size:.85rem">Penicillin 250mg</div><small class="text-muted">Expired: Oct 15, 2024 | Batch: B-2422</small></div>
+              </div>
+              <span class="badge-custom badge-danger">Expired</span>
+            </div>
+            <div class="stock-alert-card exp">
+              <div class="d-flex align-items-center gap-2 flex-1">
+                <div class="avatar avatar-sm" style="background:rgba(239,68,68,.15);color:var(--danger)"><i class="bi bi-capsule-pill"></i></div>
+                <div><div class="fw-600" style="font-size:.85rem">Tetracycline 500mg</div><small class="text-muted">Expired: Nov 01, 2024 | Batch: T-0891</small></div>
+              </div>
+              <span class="badge-custom badge-danger">Expired</span>
+            </div>
+            <div class="admin-alert-strip danger mt-1">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>2 expired medicines require immediate removal from inventory to comply with regulations.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/admin.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sidebarMount').innerHTML = ADMIN_SIDEBAR('dashboard');
+  document.getElementById('headerMount').innerHTML = ADMIN_HEADER('Dashboard','Dashboard');
+  initSidebar('adminSidebar','adminOverlay');
+
+  // Welcome time greeting
+  const h = new Date().getHours();
+  const timeEl = document.getElementById('welcomeTime');
+  if (timeEl) timeEl.textContent = h < 12 ? 'Good Morning ☀️' : h < 17 ? 'Good Afternoon 🌤️' : 'Good Evening 🌙';
+
+  // Stats
+  document.getElementById('statCustomers').textContent = DummyData.customers.length;
+  document.getElementById('statPharmacists').textContent = DummyData.pharmacists.length;
+  document.getElementById('statMedicines').textContent = DummyData.medicines.length;
+  document.getElementById('statOrders').textContent = DummyData.orders.length;
+  document.getElementById('statBrands').textContent = DummyData.brands.filter(b=>b.status==='Active').length;
+  document.getElementById('statAlerts').textContent = DummyData.stockAlerts.low.length + DummyData.stockAlerts.expired.length;
+  document.getElementById('roleCustomers').textContent = DummyData.customers.length;
+  document.getElementById('rolePharmacists').textContent = DummyData.pharmacists.length;
+
+  // Recent Orders
+  const tbody = document.getElementById('recentOrdersBody');
+  DummyData.orders.forEach(o => {
+    tbody.innerHTML += `<tr>
+      <td class="fw-700 text-primary">${o.id}</td>
+      <td>${o.date}</td>
+      <td>${o.items} items</td>
+      <td class="fw-700">${formatCurrency(o.total)}</td>
+      <td>${getStatusBadge(o.status)}</td>
+      <td><button class="btn btn-sm btn-primary-custom" onclick="showToast('Order details opened','info')"><i class="bi bi-eye me-1"></i>View</button></td>
+    </tr>`;
+  });
+
+  // Revenue Chart
+  new Chart(document.getElementById('revenueChart'), {
+    type:'line',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets:[{
+        label:'Revenue (₹)',
+        data:[42000,58000,51000,74000,63000,89000,84000],
+        borderColor:'#8B5CF6',
+        backgroundColor:'rgba(139,92,246,.08)',
+        borderWidth:2.5, fill:true, tension:.4,
+        pointBackgroundColor:'#8B5CF6', pointRadius:4,
+        pointHoverRadius:6,
+      }]
+    },
+    options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:v=>'₹'+(v/1000)+'K',font:{family:'Poppins',size:11}}},x:{grid:{display:false},ticks:{font:{family:'Poppins',size:11}}}}}
+  });
+
+  // Users Chart
+  new Chart(document.getElementById('usersChart'), {
+    type:'doughnut',
+    data:{
+      labels:['Customers','Pharmacists','Admins'],
+      datasets:[{data:[DummyData.customers.length,DummyData.pharmacists.length,2], backgroundColor:['#10B981','#2563EB','#8B5CF6'], borderWidth:0, hoverOffset:6}]
+    },
+    options:{responsive:true, plugins:{legend:{display:false}}, cutout:'72%'}
+  });
+
+  // Period selector
+  document.querySelectorAll('.period-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+});
+</script>
+</body>
+</html>

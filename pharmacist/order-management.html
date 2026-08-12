@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Order Management — Pharmacist Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/pharmacist.css">
+</head>
+<body>
+<div class="ph-layout" id="layout"></div>
+
+<!-- Order Detail Modal -->
+<div class="modal fade modal-custom" id="orderModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700" id="orderModalTitle">Order Details</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="orderModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary-custom fw-600" onclick="processOrder()"><i class="bi bi-check2 me-1"></i>Process Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/pharmacist.js"></script>
+<script>
+const orders = [
+  { id:'ORD-1042', customer:'Priya Sharma', email:'priya@example.com', phone:'9876543210', date:'25 Jul 2025', time:'10:30 AM', status:'Pending', total:424, items:[{name:'Paracetamol 500mg',qty:2,price:45},{name:'Vitamin D3 1000IU',qty:1,price:299},{name:'Cetirizine 10mg',qty:1,price:35}], address:'42B, Marine Drive, Mumbai 400002', payment:'UPI' },
+  { id:'ORD-1041', customer:'Rahul Mehta', email:'rahul@example.com', phone:'9123456789', date:'25 Jul 2025', time:'09:15 AM', status:'Processing', total:720, items:[{name:'Atorvastatin 20mg',qty:2,price:220},{name:'Metformin 500mg',qty:3,price:95}], address:'15A, Connaught Place, Delhi 110001', payment:'Card' },
+  { id:'ORD-1040', customer:'Anita Singh', email:'anita@example.com', phone:'9876012345', date:'24 Jul 2025', time:'04:45 PM', status:'Delivered', total:1240, items:[{name:'Multivitamin Daily',qty:2,price:450},{name:'Omeprazole 20mg',qty:3,price:75},{name:'Ibuprofen 400mg',qty:1,price:55}], address:'8, MG Road, Pune 411001', payment:'COD' },
+  { id:'ORD-1039', customer:'Vikram Patel', email:'vikram@example.com', phone:'9000123456', date:'24 Jul 2025', time:'02:20 PM', status:'Delivered', total:299, items:[{name:'Vitamin D3 1000IU',qty:1,price:299}], address:'22, Jubilee Hills, Hyderabad 500033', payment:'UPI' },
+  { id:'ORD-1038', customer:'Neha Gupta', email:'neha@example.com', phone:'9988776655', date:'24 Jul 2025', time:'11:00 AM', status:'Cancelled', total:850, items:[{name:'Salbutamol Inhaler',qty:2,price:350},{name:'Pantoprazole 40mg',qty:1,price:120}], address:'5C, Salt Lake, Kolkata 700091', payment:'Card' },
+  { id:'ORD-1037', customer:'Arjun Rao', email:'arjun@example.com', phone:'8877665544', date:'23 Jul 2025', time:'06:30 PM', status:'Delivered', total:560, items:[{name:'Amoxicillin 250mg',qty:2,price:180},{name:'Paracetamol 500mg',qty:4,price:45}], address:'12, Indiranagar, Bangalore 560038', payment:'UPI' },
+  { id:'ORD-1036', customer:'Sunita Desai', email:'sunita@example.com', phone:'7766554433', date:'23 Jul 2025', time:'03:15 PM', status:'Processing', total:395, items:[{name:'Cetirizine 10mg',qty:2,price:35},{name:'Vitamin D3 1000IU',qty:1,price:299}], address:'9, FC Road, Pune 411005', payment:'Card' },
+  { id:'ORD-1035', customer:'Kiran Joshi', email:'kiran@example.com', phone:'6655443322', date:'23 Jul 2025', time:'01:00 PM', status:'Pending', total:675, items:[{name:'Omeprazole 20mg',qty:3,price:75},{name:'Atorvastatin 20mg',qty:1,price:220},{name:'Ibuprofen 400mg',qty:4,price:55}], address:'33, Ashram Road, Ahmedabad 380009', payment:'COD' },
+];
+
+const pending = orders.filter(o => o.status === 'Pending').length;
+const processing = orders.filter(o => o.status === 'Processing').length;
+const delivered = orders.filter(o => o.status === 'Delivered').length;
+const totalRevenue = orders.filter(o => o.status !== 'Cancelled').reduce((s,o) => s + o.total, 0);
+
+document.getElementById('layout').innerHTML = PH_SIDEBAR('orders') + `
+<div class="ph-main">
+  ${PH_HEADER('Order Management','Orders')}
+  <div class="ph-content">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="stat-card stat-orange"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-clock-fill"></i></div><span class="stat-trend">Action Needed</span></div><div class="stat-value">${pending}</div><div class="stat-label">Pending Orders</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-blue"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-arrow-repeat"></i></div><span class="stat-trend">In Progress</span></div><div class="stat-value">${processing}</div><div class="stat-label">Processing</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-green"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div><span class="stat-trend">Fulfilled</span></div><div class="stat-value">${delivered}</div><div class="stat-label">Delivered</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-cyan"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-currency-rupee"></i></div><span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>+15%</span></div><div class="stat-value">₹${(totalRevenue/1000).toFixed(1)}K</div><div class="stat-label">Total Revenue</div></div></div>
+    </div>
+
+    <!-- Order Tabs -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-sm btn-primary-custom fw-600 order-tab active" data-filter="">All Orders (${orders.length})</button>
+          <button class="btn btn-sm btn-outline-primary-custom fw-600 order-tab" data-filter="Pending">Pending (${pending})</button>
+          <button class="btn btn-sm btn-outline-primary-custom fw-600 order-tab" data-filter="Processing">Processing (${processing})</button>
+          <button class="btn btn-sm btn-outline-primary-custom fw-600 order-tab" data-filter="Delivered">Delivered (${delivered})</button>
+          <button class="btn btn-sm btn-outline-primary-custom fw-600 order-tab" data-filter="Cancelled">Cancelled</button>
+        </div>
+        <div class="d-flex gap-2">
+          <div class="search-bar" style="max-width:220px"><i class="bi bi-search"></i><input type="text" class="form-control" id="orderSearch" placeholder="Search orders..."></div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-custom" id="orderTable">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="orderTableBody"></tbody>
+        </table>
+      </div>
+      <div class="data-card-footer">
+        <span class="text-muted small">Showing <span id="orderCount">${orders.length}</span> orders</span>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+function renderOrderTable(data) {
+  document.getElementById('orderCount').textContent = data.length;
+  document.getElementById('orderTableBody').innerHTML = data.map(o => {
+    const statusMap = { Pending:'badge-warning', Processing:'badge-info', Delivered:'badge-success', Cancelled:'badge-danger' };
+    const initials = o.customer.split(' ').map(w=>w[0]).join('');
+    const colors = ['#1a6bcc','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
+    const color = colors[o.customer.charCodeAt(0) % colors.length];
+    return `
+    <tr>
+      <td class="fw-600 text-primary">#${o.id}</td>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <div class="avatar avatar-sm" style="background:${color};font-size:.7rem">${initials}</div>
+          <div><div class="fw-600" style="font-size:.85rem">${o.customer}</div><small class="text-muted">${o.email}</small></div>
+        </div>
+      </td>
+      <td><div style="font-size:.85rem">${o.date}</div><small class="text-muted">${o.time}</small></td>
+      <td>${o.items.length} items</td>
+      <td class="fw-700">₹${o.total}</td>
+      <td><span class="badge-custom badge-info">${o.payment}</span></td>
+      <td><span class="badge-custom ${statusMap[o.status]}">${o.status}</span></td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="viewOrder('${o.id}')" title="View"><i class="bi bi-eye"></i></button>
+          ${o.status === 'Pending' ? '<button class="btn btn-sm btn-primary-custom py-0 px-2" onclick="changeStatus(\''+o.id+'\',\'Processing\')" title="Process"><i class="bi bi-play-fill"></i></button>' : ''}
+          ${o.status === 'Processing' ? '<button class="btn btn-sm btn-primary-custom py-0 px-2" onclick="changeStatus(\''+o.id+'\',\'Delivered\')" title="Mark Delivered"><i class="bi bi-check2"></i></button>' : ''}
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="showToast('Invoice generated','info')" title="Invoice"><i class="bi bi-receipt"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function viewOrder(id) {
+  const o = orders.find(x => x.id === id);
+  document.getElementById('orderModalTitle').textContent = 'Order #' + o.id;
+  document.getElementById('orderModalBody').innerHTML = `
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card-custom p-3">
+          <h6 class="fw-700 mb-2"><i class="bi bi-person me-1 text-primary"></i>Customer</h6>
+          <div style="font-size:.88rem"><strong>${o.customer}</strong></div>
+          <div class="text-muted small">${o.email}</div>
+          <div class="text-muted small"><i class="bi bi-telephone me-1"></i>${o.phone}</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-custom p-3">
+          <h6 class="fw-700 mb-2"><i class="bi bi-truck me-1 text-primary"></i>Delivery</h6>
+          <div class="text-muted small">${o.address}</div>
+          <div class="mt-1">${getStatusBadge(o.status)} <span class="badge-custom badge-info ms-1">${o.payment}</span></div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card-custom p-3">
+          <h6 class="fw-700 mb-2"><i class="bi bi-bag me-1 text-primary"></i>Order Items</h6>
+          <table class="table-custom">
+            <thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+            <tbody>
+              ${o.items.map(i => `<tr><td class="fw-600">${i.name}</td><td>${i.qty}</td><td>₹${i.price}</td><td class="fw-700">₹${i.qty * i.price}</td></tr>`).join('')}
+            </tbody>
+            <tfoot><tr><td colspan="3" class="text-end fw-700">Grand Total</td><td class="fw-700 text-primary">₹${o.total}</td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  new bootstrap.Modal(document.getElementById('orderModal')).show();
+}
+
+function changeStatus(id, newStatus) {
+  const o = orders.find(x => x.id === id);
+  showConfirm({ title: 'Update Order Status?', message: `Change order #${id} status to "${newStatus}"?`, icon:'bi-bag-check', iconColor:'#1a6bcc', confirmText:'Update',
+    onConfirm: () => { o.status = newStatus; renderOrderTable(orders); showToast(`Order #${id} marked as ${newStatus}`, 'success'); }
+  });
+}
+function processOrder() { showToast('Order processed successfully!','success'); bootstrap.Modal.getInstance(document.getElementById('orderModal')).hide(); }
+
+let activeFilter = '';
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar('phSidebar','phOverlay');
+  renderOrderTable(orders);
+
+  document.querySelectorAll('.order-tab').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.order-tab').forEach(b => { b.classList.remove('active','btn-primary-custom'); b.classList.add('btn-outline-primary-custom'); });
+      this.classList.add('active','btn-primary-custom'); this.classList.remove('btn-outline-primary-custom');
+      activeFilter = this.dataset.filter;
+      const q = document.getElementById('orderSearch').value.toLowerCase();
+      renderOrderTable(orders.filter(o => (!activeFilter || o.status === activeFilter) && (!q || o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q))));
+    });
+  });
+
+  document.getElementById('orderSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    renderOrderTable(orders.filter(o => (!activeFilter || o.status === activeFilter) && (o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q) || o.email.toLowerCase().includes(q))));
+  });
+});
+</script>
+</body>
+</html>

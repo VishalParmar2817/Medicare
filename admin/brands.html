@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Brand Management — Admin Panel</title>
+  <meta name="description" content="Manage pharmaceutical brands — add, edit, and track brand partners.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+<div id="sidebarMount"></div>
+<div class="admin-main">
+  <div id="headerMount"></div>
+  <div class="admin-content">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="stat-card stat-purple"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-building"></i></div><span class="stat-trend">Partners</span></div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total Brands</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-green"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div><span class="stat-trend">Live</span></div><div class="stat-value" id="statActive">0</div><div class="stat-label">Active</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-red"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-x-circle-fill"></i></div><span class="stat-trend">Paused</span></div><div class="stat-value" id="statInactive">0</div><div class="stat-label">Inactive</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-cyan"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-globe2"></i></div><span class="stat-trend">Global</span></div><div class="stat-value" id="statCountries">0</div><div class="stat-label">Countries</div></div></div>
+    </div>
+
+    <!-- Brand Table -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-title"><i class="bi bi-building me-2 text-primary"></i>All Brands</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <div class="search-bar" style="max-width:220px"><i class="bi bi-search"></i><input type="text" id="searchBrand" class="form-control" placeholder="Search brands..."></div>
+          <button class="btn btn-primary-custom fw-600" data-bs-toggle="modal" data-bs-target="#addBrandModal"><i class="bi bi-plus me-1"></i>Add Brand</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-custom" id="brandTable">
+          <thead><tr><th>ID</th><th>Brand Name</th><th>Country</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="brandBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Add Brand Modal -->
+<div class="modal fade modal-custom" id="addBrandModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700"><i class="bi bi-building me-2"></i>Add New Brand</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12"><label class="form-label fw-600">Brand Name</label><input type="text" class="form-control form-control-custom" placeholder="e.g. BioPharma"></div>
+          <div class="col-md-6"><label class="form-label fw-600">Country</label><input type="text" class="form-control form-control-custom" placeholder="e.g. India"></div>
+          <div class="col-md-6"><label class="form-label fw-600">Status</label><select class="form-select form-control-custom"><option>Active</option><option>Inactive</option></select></div>
+          <div class="col-12"><label class="form-label fw-600">Description</label><textarea class="form-control form-control-custom" rows="2" placeholder="Brief description..."></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary-custom fw-600" onclick="showToast('Brand added successfully!','success');bootstrap.Modal.getInstance(document.getElementById('addBrandModal')).hide()"><i class="bi bi-check-lg me-1"></i>Add Brand</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/admin.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sidebarMount').innerHTML = ADMIN_SIDEBAR('brands');
+  document.getElementById('headerMount').innerHTML = ADMIN_HEADER('Brand Management','Brands');
+  initSidebar('adminSidebar','adminOverlay');
+
+  const brands = DummyData.brands;
+  document.getElementById('statTotal').textContent = brands.length;
+  document.getElementById('statActive').textContent = brands.filter(b=>b.status==='Active').length;
+  document.getElementById('statInactive').textContent = brands.filter(b=>b.status==='Inactive').length;
+  document.getElementById('statCountries').textContent = [...new Set(brands.map(b=>b.country))].length;
+
+  const tbody = document.getElementById('brandBody');
+  const countryFlags = {'India':'🇮🇳','USA':'🇺🇸','UK':'🇬🇧','Germany':'🇩🇪'};
+  brands.forEach(b => {
+    tbody.innerHTML += `<tr>
+      <td class="fw-600">${b.id}</td>
+      <td><div class="d-flex align-items-center gap-2"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);font-size:.7rem">${b.name.substring(0,2).toUpperCase()}</div><div class="fw-600" style="font-size:.9rem">${b.name}</div></div></td>
+      <td><span style="font-size:1.1rem">${countryFlags[b.country]||'🌍'}</span> ${b.country}</td>
+      <td class="fw-600">${b.products} products</td>
+      <td>${getStatusBadge(b.status)}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary-custom" title="Edit" onclick="showToast('Editing ${b.name}','info')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger-custom" title="Delete" onclick="showConfirm({title:'Delete Brand?',message:'Remove ${b.name}?',onConfirm:()=>showToast('Brand deleted','error')})"><i class="bi bi-trash"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  filterTable('searchBrand','brandTable');
+});
+</script>
+</body>
+</html>

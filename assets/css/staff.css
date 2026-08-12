@@ -1,0 +1,24 @@
+/* ============================================================
+   STYLE HUB STAFF CSS — Store Operations Portal Styling
+   ============================================================ */
+.ph-sidebar {
+  background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+}
+
+.ph-sidebar .sidebar-brand-icon {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+.ph-sidebar .sidebar-nav-link.active {
+  background: linear-gradient(90deg, rgba(79,70,229,.7), rgba(124,58,237,.3));
+  color: var(--white);
+}
+
+.staff-welcome-card {
+  background: linear-gradient(135deg, #1E293B, #0F172A);
+  color: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}

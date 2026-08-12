@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Billing — Pharmacist Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/pharmacist.css">
+</head>
+<body>
+<div class="ph-layout" id="layout"></div>
+
+<!-- Invoice Modal -->
+<div class="modal fade modal-custom" id="invoiceModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700" id="invoiceTitle">Invoice</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="invoiceBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-outline-primary-custom fw-600" onclick="showToast('Invoice downloaded as PDF','success')"><i class="bi bi-download me-1"></i>Download PDF</button>
+        <button class="btn btn-primary-custom fw-600" onclick="showToast('Invoice sent to customer email','success')"><i class="bi bi-envelope me-1"></i>Send to Email</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Bill Modal -->
+<div class="modal fade modal-custom" id="newBillModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700">Create New Bill</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label fw-600 small">Customer Name*</label><input type="text" class="form-control form-control-custom" placeholder="Patient name"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Phone*</label><input type="tel" class="form-control form-control-custom" placeholder="9876543210"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Doctor Name</label><input type="text" class="form-control form-control-custom" placeholder="Dr. Name"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Prescription ID</label><input type="text" class="form-control form-control-custom" placeholder="RX-2025-XXX"></div>
+          <div class="col-12">
+            <label class="form-label fw-600 small">Add Medicines</label>
+            <div class="d-flex gap-2 mb-2">
+              <select class="form-control form-control-custom flex-1" id="billMedSelect">
+                ${DummyData.medicines.map(m => `<option value="${m.id}" data-price="${m.price}">${m.name} — ₹${m.price}</option>`).join('')}
+              </select>
+              <input type="number" class="form-control form-control-custom" style="width:80px" placeholder="Qty" id="billMedQty" value="1" min="1">
+              <button class="btn btn-primary-custom" onclick="addBillItem()"><i class="bi bi-plus"></i></button>
+            </div>
+            <div id="billItems" class="d-flex flex-column gap-1"></div>
+            <div class="mt-2 p-2 rounded d-flex justify-content-between" style="background:rgba(26,107,204,.05)">
+              <span class="fw-600">Subtotal</span>
+              <span class="fw-700 text-primary" id="billSubtotal">₹0.00</span>
+            </div>
+          </div>
+          <div class="col-md-4"><label class="form-label fw-600 small">Discount (%)</label><input type="number" class="form-control form-control-custom" value="0" id="billDiscount" oninput="calcBillTotal()"></div>
+          <div class="col-md-4"><label class="form-label fw-600 small">GST (%)</label><input type="number" class="form-control form-control-custom" value="5" id="billGST" oninput="calcBillTotal()"></div>
+          <div class="col-md-4"><label class="form-label fw-600 small">Payment Method</label><select class="form-control form-control-custom"><option>Cash</option><option>UPI</option><option>Card</option><option>Net Banking</option></select></div>
+          <div class="col-12">
+            <div class="p-3 rounded" style="background:linear-gradient(135deg,rgba(26,107,204,.06),rgba(0,180,216,.06))">
+              <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Subtotal</span><span id="billSub2">₹0.00</span></div>
+              <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Discount</span><span class="text-success" id="billDiscAmt">-₹0.00</span></div>
+              <div class="d-flex justify-content-between mb-1"><span class="text-muted small">GST</span><span id="billGSTAmt">₹0.00</span></div>
+              <hr class="my-2">
+              <div class="d-flex justify-content-between"><span class="fw-700">Grand Total</span><span class="fw-700 text-primary" style="font-size:1.2rem" id="billGrandTotal">₹0.00</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary-custom fw-600" onclick="generateBill()"><i class="bi bi-receipt me-1"></i>Generate Bill</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/pharmacist.js"></script>
+<script>
+const invoices = [
+  { id:'INV-2025-0042', customer:'Priya Sharma', phone:'9876543210', date:'25 Jul 2025', items:[{name:'Paracetamol 500mg',qty:2,price:45},{name:'Vitamin D3 1000IU',qty:1,price:299},{name:'Cetirizine 10mg',qty:1,price:35}], subtotal:424, discount:0, gst:21.20, total:445.20, payment:'UPI', status:'Paid' },
+  { id:'INV-2025-0041', customer:'Rahul Mehta', phone:'9123456789', date:'25 Jul 2025', items:[{name:'Atorvastatin 20mg',qty:2,price:220},{name:'Metformin 500mg',qty:3,price:95}], subtotal:725, discount:36.25, gst:34.44, total:723.19, payment:'Card', status:'Paid' },
+  { id:'INV-2025-0040', customer:'Anita Singh', phone:'9876012345', date:'24 Jul 2025', items:[{name:'Multivitamin Daily',qty:2,price:450},{name:'Omeprazole 20mg',qty:3,price:75}], subtotal:1125, discount:112.50, gst:50.63, total:1063.13, payment:'Cash', status:'Paid' },
+  { id:'INV-2025-0039', customer:'Vikram Patel', phone:'9000123456', date:'24 Jul 2025', items:[{name:'Vitamin D3 1000IU',qty:1,price:299}], subtotal:299, discount:0, gst:14.95, total:313.95, payment:'UPI', status:'Paid' },
+  { id:'INV-2025-0038', customer:'Neha Gupta', phone:'9988776655', date:'23 Jul 2025', items:[{name:'Salbutamol Inhaler',qty:1,price:350},{name:'Pantoprazole 40mg',qty:2,price:120}], subtotal:590, discount:29.50, gst:28.03, total:588.53, payment:'Card', status:'Pending' },
+  { id:'INV-2025-0037', customer:'Arjun Rao', phone:'8877665544', date:'23 Jul 2025', items:[{name:'Amoxicillin 250mg',qty:2,price:180},{name:'Paracetamol 500mg',qty:4,price:45}], subtotal:540, discount:27, gst:25.65, total:538.65, payment:'Cash', status:'Paid' },
+  { id:'INV-2025-0036', customer:'Sunita Desai', phone:'7766554433', date:'22 Jul 2025', items:[{name:'Cetirizine 10mg',qty:3,price:35},{name:'Vitamin D3 1000IU',qty:1,price:299}], subtotal:404, discount:0, gst:20.20, total:424.20, payment:'UPI', status:'Refunded' },
+];
+
+const totalRevenue = invoices.filter(i=>i.status==='Paid').reduce((s,i)=>s+i.total, 0);
+const todayInvoices = invoices.filter(i=>i.date==='25 Jul 2025').length;
+
+document.getElementById('layout').innerHTML = PH_SIDEBAR('billing') + `
+<div class="ph-main">
+  ${PH_HEADER('Billing','Billing')}
+  <div class="ph-content">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="stat-card stat-blue"><div class="stat-icon mb-2">🧾</div><div class="stat-value">${invoices.length}</div><div class="stat-label">Total Invoices</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-green"><div class="stat-icon mb-2">💰</div><div class="stat-value">₹${(totalRevenue/1000).toFixed(1)}K</div><div class="stat-label">Total Revenue</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-cyan"><div class="stat-icon mb-2">📊</div><div class="stat-value">${todayInvoices}</div><div class="stat-label">Today's Bills</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-orange"><div class="stat-icon mb-2">⏳</div><div class="stat-value">${invoices.filter(i=>i.status==='Pending').length}</div><div class="stat-label">Pending Payments</div></div></div>
+    </div>
+
+    <!-- Invoices Table -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-title">🧾 Invoices</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <div class="search-bar" style="max-width:220px"><i class="bi bi-search"></i><input type="text" class="form-control" id="billSearch" placeholder="Search invoices..."></div>
+          <button class="btn btn-outline-primary-custom fw-600"><i class="bi bi-download me-1"></i>Export</button>
+          <button class="btn btn-primary-custom fw-600" data-bs-toggle="modal" data-bs-target="#newBillModal"><i class="bi bi-plus me-1"></i>New Bill</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-custom">
+          <thead><tr><th>Invoice ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Subtotal</th><th>Discount</th><th>GST</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="billTableBody"></tbody>
+        </table>
+      </div>
+      <div class="data-card-footer">
+        <span class="text-muted small">Showing ${invoices.length} invoices</span>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+function renderBillTable(data) {
+  document.getElementById('billTableBody').innerHTML = data.map(inv => {
+    const statusMap = { Paid:'badge-success', Pending:'badge-warning', Refunded:'badge-info' };
+    return `
+    <tr>
+      <td class="fw-600 text-primary">${inv.id}</td>
+      <td><div class="fw-600" style="font-size:.85rem">${inv.customer}</div><small class="text-muted">${inv.phone}</small></td>
+      <td class="text-muted small">${inv.date}</td>
+      <td>${inv.items.length} items</td>
+      <td>₹${inv.subtotal.toFixed(2)}</td>
+      <td class="text-success">${inv.discount > 0 ? '-₹'+inv.discount.toFixed(2) : '—'}</td>
+      <td class="text-muted">₹${inv.gst.toFixed(2)}</td>
+      <td class="fw-700">₹${inv.total.toFixed(2)}</td>
+      <td><span class="badge-custom badge-info">${inv.payment}</span></td>
+      <td><span class="badge-custom ${statusMap[inv.status]}">${inv.status}</span></td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="viewInvoice('${inv.id}')" title="View"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="showToast('Invoice printed','success')" title="Print"><i class="bi bi-printer"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function viewInvoice(id) {
+  const inv = invoices.find(x => x.id === id);
+  document.getElementById('invoiceTitle').textContent = inv.id;
+  document.getElementById('invoiceBody').innerHTML = `
+    <div class="p-4" style="border:1px solid #e2e8f0;border-radius:12px">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+          <h4 class="fw-700 mb-1" style="color:var(--primary)"><i class="bi bi-capsule-pill me-2"></i>MediCare Pharmacy</h4>
+          <div class="text-muted small">123 Health Street, Mumbai, MH 400001</div>
+          <div class="text-muted small">GSTIN: 27AABCU9603R1ZN | DL: MH-MUM-2024-001</div>
+        </div>
+        <div class="text-end">
+          <h5 class="fw-700 mb-1">INVOICE</h5>
+          <div class="fw-600 text-primary">${inv.id}</div>
+          <div class="text-muted small">Date: ${inv.date}</div>
+        </div>
+      </div>
+      <hr>
+      <!-- Customer -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="text-muted small mb-1">Bill To:</div>
+          <div class="fw-600">${inv.customer}</div>
+          <div class="text-muted small"><i class="bi bi-telephone me-1"></i>${inv.phone}</div>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <div class="text-muted small mb-1">Payment Method:</div>
+          <span class="badge-custom badge-info">${inv.payment}</span>
+        </div>
+      </div>
+      <!-- Items -->
+      <table class="table-custom mb-3">
+        <thead><tr><th>#</th><th>Medicine</th><th>Qty</th><th>Unit Price</th><th class="text-end">Amount</th></tr></thead>
+        <tbody>
+          ${inv.items.map((item, i) => `<tr><td>${i+1}</td><td class="fw-600">${item.name}</td><td>${item.qty}</td><td>₹${item.price.toFixed(2)}</td><td class="text-end fw-600">₹${(item.qty * item.price).toFixed(2)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <!-- Totals -->
+      <div class="row justify-content-end">
+        <div class="col-md-5">
+          <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Subtotal</span><span>₹${inv.subtotal.toFixed(2)}</span></div>
+          ${inv.discount > 0 ? `<div class="d-flex justify-content-between mb-1"><span class="text-muted small">Discount</span><span class="text-success">-₹${inv.discount.toFixed(2)}</span></div>` : ''}
+          <div class="d-flex justify-content-between mb-1"><span class="text-muted small">GST (5%)</span><span>₹${inv.gst.toFixed(2)}</span></div>
+          <hr class="my-2">
+          <div class="d-flex justify-content-between"><span class="fw-700">Grand Total</span><span class="fw-700 text-primary" style="font-size:1.2rem">₹${inv.total.toFixed(2)}</span></div>
+        </div>
+      </div>
+      <!-- Footer -->
+      <hr class="mt-4">
+      <div class="text-center text-muted small">
+        <p class="mb-1">Thank you for choosing MediCare Pharmacy!</p>
+        <p class="mb-0">For queries, call +91 98765 43210 or email support@medicare.com</p>
+      </div>
+    </div>`;
+  new bootstrap.Modal(document.getElementById('invoiceModal')).show();
+}
+
+// New Bill Logic
+let billItemsList = [];
+function addBillItem() {
+  const sel = document.getElementById('billMedSelect');
+  const qty = parseInt(document.getElementById('billMedQty').value) || 1;
+  const med = DummyData.medicines.find(m => m.id == sel.value);
+  if (!med) return;
+  const existing = billItemsList.find(i => i.id === med.id);
+  if (existing) { existing.qty += qty; } else { billItemsList.push({ id:med.id, name:med.name, price:med.price, qty }); }
+  renderBillItems();
+}
+function removeBillItem(id) { billItemsList = billItemsList.filter(i => i.id !== id); renderBillItems(); }
+function renderBillItems() {
+  const container = document.getElementById('billItems');
+  container.innerHTML = billItemsList.map(i => `
+    <div class="d-flex align-items-center gap-2 p-2 rounded" style="background:rgba(26,107,204,.04)">
+      <span style="font-size:1.1rem">💊</span>
+      <div class="flex-1"><div class="fw-600" style="font-size:.85rem">${i.name}</div><small class="text-muted">₹${i.price} × ${i.qty}</small></div>
+      <span class="fw-600">₹${(i.price * i.qty).toFixed(2)}</span>
+      <button class="btn btn-sm btn-danger-custom py-0 px-1" onclick="removeBillItem(${i.id})"><i class="bi bi-x"></i></button>
+    </div>
+  `).join('');
+  calcBillTotal();
+}
+function calcBillTotal() {
+  const sub = billItemsList.reduce((s,i) => s + i.price * i.qty, 0);
+  const discPct = parseFloat(document.getElementById('billDiscount')?.value) || 0;
+  const gstPct = parseFloat(document.getElementById('billGST')?.value) || 0;
+  const discAmt = sub * discPct / 100;
+  const afterDisc = sub - discAmt;
+  const gstAmt = afterDisc * gstPct / 100;
+  const total = afterDisc + gstAmt;
+  document.getElementById('billSubtotal').textContent = '₹' + sub.toFixed(2);
+  if (document.getElementById('billSub2')) document.getElementById('billSub2').textContent = '₹' + sub.toFixed(2);
+  if (document.getElementById('billDiscAmt')) document.getElementById('billDiscAmt').textContent = '-₹' + discAmt.toFixed(2);
+  if (document.getElementById('billGSTAmt')) document.getElementById('billGSTAmt').textContent = '₹' + gstAmt.toFixed(2);
+  if (document.getElementById('billGrandTotal')) document.getElementById('billGrandTotal').textContent = '₹' + total.toFixed(2);
+}
+function generateBill() {
+  if (!billItemsList.length) { showToast('Please add at least one medicine','warning'); return; }
+  showLoader();
+  setTimeout(() => {
+    hideLoader();
+    bootstrap.Modal.getInstance(document.getElementById('newBillModal')).hide();
+    billItemsList = [];
+    showToast('Invoice generated successfully!','success');
+  }, 1200);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar('phSidebar','phOverlay');
+  renderBillTable(invoices);
+  document.getElementById('billSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    renderBillTable(invoices.filter(i => i.id.toLowerCase().includes(q) || i.customer.toLowerCase().includes(q)));
+  });
+});
+</script>
+</body>
+</html>

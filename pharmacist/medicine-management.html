@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Medicine Management — Pharmacist Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/pharmacist.css">
+</head>
+<body>
+<div class="ph-layout" id="layout"></div>
+
+<!-- Add/Edit Medicine Modal -->
+<div class="modal fade modal-custom" id="medModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700" id="medModalTitle">Add Medicine</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label fw-600 small">Medicine Name*</label><input type="text" class="form-control form-control-custom" id="medName" placeholder="e.g. Paracetamol 500mg"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Brand*</label><select class="form-control form-control-custom" id="medBrand"><option>MedCure</option><option>BioPharma</option><option>VitaBoost</option><option>GastroCare</option><option>AllerFree</option></select></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Category*</label><select class="form-control form-control-custom"><option>Pain Relief</option><option>Antibiotics</option><option>Vitamins</option><option>Cardiology</option><option>Diabetes</option><option>Allergy</option><option>Gastro</option><option>Respiratory</option></select></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Supplier</label><select class="form-control form-control-custom"><option>Sun Pharma Distributors</option><option>Cipla Wholesale</option><option>Abbott Logistics</option></select></div>
+          <div class="col-md-4"><label class="form-label fw-600 small">Price (₹)*</label><input type="number" class="form-control form-control-custom" placeholder="0.00"></div>
+          <div class="col-md-4"><label class="form-label fw-600 small">MRP (₹)</label><input type="number" class="form-control form-control-custom" placeholder="0.00"></div>
+          <div class="col-md-4"><label class="form-label fw-600 small">Stock Quantity*</label><input type="number" class="form-control form-control-custom" placeholder="0"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Batch Number</label><input type="text" class="form-control form-control-custom" placeholder="BT-2024-001"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Expiry Date*</label><input type="date" class="form-control form-control-custom"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Dosage Form</label><select class="form-control form-control-custom"><option>Tablet</option><option>Capsule</option><option>Syrup</option><option>Injection</option><option>Inhaler</option><option>Cream</option><option>Drops</option></select></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Prescription Required</label><select class="form-control form-control-custom"><option>No</option><option>Yes</option></select></div>
+          <div class="col-12"><label class="form-label fw-600 small">Description</label><textarea class="form-control form-control-custom" rows="2" placeholder="Brief medicine description"></textarea></div>
+          <div class="col-12"><label class="form-label fw-600 small">Side Effects</label><textarea class="form-control form-control-custom" rows="2" placeholder="Known side effects"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary-custom fw-600" onclick="saveMed()"><i class="bi bi-check2 me-1"></i>Save Medicine</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/pharmacist.js"></script>
+<script>
+document.getElementById('layout').innerHTML = PH_SIDEBAR('medicine') + `
+<div class="ph-main">
+  ${PH_HEADER('Medicine Management','Medicine Management')}
+  <div class="ph-content">
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-title">All Medicines (${DummyData.medicines.length})</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <div class="search-bar" style="max-width:220px"><i class="bi bi-search"></i><input type="text" class="form-control" id="medSearch" placeholder="Search medicines..."></div>
+          <select class="form-select form-select-sm" style="width:130px;font-family:var(--font-main)" id="catFilterSel">
+            <option value="">All Categories</option>
+            ${[...new Set(DummyData.medicines.map(m=>m.category))].map(c=>'<option>'+c+'</option>').join('')}
+          </select>
+          <button class="btn btn-primary-custom fw-600" data-bs-toggle="modal" data-bs-target="#medModal"><i class="bi bi-plus me-1"></i>Add Medicine</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-custom" id="medTable">
+          <thead><tr><th>#</th><th>Medicine</th><th>Brand</th><th>Category</th><th>Price</th><th>Stock</th><th>Expiry</th><th>Rx</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="medTableBody"></tbody>
+        </table>
+      </div>
+      <div class="data-card-footer">
+        <span class="text-muted small">Showing <span id="medCount">${DummyData.medicines.length}</span> medicines</span>
+        <ul class="pagination pagination-custom mb-0" id="medPagination"></ul>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+function renderMedTable(meds) {
+  document.getElementById('medCount').textContent = meds.length;
+  document.getElementById('medTableBody').innerHTML = meds.map((m, i) => `
+    <tr>
+      <td class="text-muted small">${String(i+1).padStart(3,'0')}</td>
+      <td><div class="fw-600" style="font-size:.88rem">${m.name}</div></td>
+      <td><span class="badge-custom badge-info">${m.brand}</span></td>
+      <td><span class="text-muted small">${m.category}</span></td>
+      <td class="fw-600 text-primary">₹${m.price}</td>
+      <td>
+        <div class="d-flex align-items-center gap-1">
+          <div class="progress flex-1" style="height:6px;width:60px">
+            <div class="progress-bar ${m.stock>100?'bg-success':m.stock>50?'bg-warning':'bg-danger'}" style="width:${Math.min(m.stock,200)/2}%"></div>
+          </div>
+          <span style="font-size:.8rem">${m.stock}</span>
+        </div>
+      </td>
+      <td class="${m.stock<50?'expiry-warn':'expiry-ok'}" style="font-size:.82rem">Dec 2025</td>
+      <td>${m.rxRequired ? '<span class="badge-custom badge-danger">Yes</span>' : '<span class="badge-custom badge-success">No</span>'}</td>
+      <td>${m.stock > 0 ? '<span class="badge-custom badge-success">Active</span>' : '<span class="badge-custom badge-danger">Out of Stock</span>'}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="editMed(${m.id})" title="Edit"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger-custom py-0 px-2" onclick="deleteMed(${m.id})" title="Delete"><i class="bi bi-trash"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function editMed(id) {
+  const m = DummyData.medicines.find(x => x.id === id);
+  document.getElementById('medModalTitle').textContent = 'Edit Medicine';
+  document.getElementById('medName').value = m.name;
+  new bootstrap.Modal(document.getElementById('medModal')).show();
+}
+function deleteMed(id) {
+  showConfirm({ title:'Delete Medicine?', message:'This will permanently remove this medicine.', onConfirm: () => showToast('Medicine deleted','error') });
+}
+function saveMed() {
+  showLoader();
+  setTimeout(() => { hideLoader(); bootstrap.Modal.getInstance(document.getElementById('medModal')).hide(); showToast('Medicine saved successfully!', 'success'); }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar('phSidebar', 'phOverlay');
+  renderMedTable(DummyData.medicines);
+  document.getElementById('medSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    renderMedTable(DummyData.medicines.filter(m => m.name.toLowerCase().includes(q) || m.brand.toLowerCase().includes(q)));
+  });
+  document.getElementById('catFilterSel').addEventListener('change', function() {
+    renderMedTable(this.value ? DummyData.medicines.filter(m => m.category === this.value) : DummyData.medicines);
+  });
+});
+</script>
+</body>
+</html>
