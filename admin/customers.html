@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Customer Management — Admin Panel</title>
+  <meta name="description" content="Manage all registered customers — view, search, edit, and manage customer accounts.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+<div id="sidebarMount"></div>
+<div class="admin-main">
+  <div id="headerMount"></div>
+  <div class="admin-content">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="stat-card stat-purple"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-people-fill"></i></div><span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>+12%</span></div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total Customers</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-green"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div><span class="stat-trend">Active</span></div><div class="stat-value" id="statActive">0</div><div class="stat-label">Active Accounts</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-red"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-person-x-fill"></i></div><span class="stat-trend">Inactive</span></div><div class="stat-value" id="statInactive">0</div><div class="stat-label">Inactive Accounts</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-cyan"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-bag-check-fill"></i></div><span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>+5%</span></div><div class="stat-value" id="statTotalOrders">0</div><div class="stat-label">Total Orders</div></div></div>
+    </div>
+
+    <!-- Customer Table -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-title"><i class="bi bi-people me-2 text-primary"></i>All Customers</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <div class="search-bar" style="max-width:220px"><i class="bi bi-search"></i><input type="text" id="searchCustomers" class="form-control" placeholder="Search customers..."></div>
+          <button class="btn btn-primary-custom fw-600" data-bs-toggle="modal" data-bs-target="#addCustomerModal"><i class="bi bi-plus me-1"></i>Add Customer</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-custom" id="customersTable">
+          <thead><tr><th>ID</th><th>Customer</th><th>Email</th><th>Phone</th><th>Orders</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="customersBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal fade modal-custom" id="addCustomerModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700"><i class="bi bi-person-plus me-2"></i>Add New Customer</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12"><label class="form-label fw-600">Full Name</label><input type="text" class="form-control form-control-custom" placeholder="Enter full name"></div>
+          <div class="col-md-6"><label class="form-label fw-600">Email</label><input type="email" class="form-control form-control-custom" placeholder="email@example.com"></div>
+          <div class="col-md-6"><label class="form-label fw-600">Phone</label><input type="tel" class="form-control form-control-custom" placeholder="9876543210"></div>
+          <div class="col-md-6"><label class="form-label fw-600">Status</label><select class="form-select form-control-custom"><option>Active</option><option>Inactive</option></select></div>
+          <div class="col-md-6"><label class="form-label fw-600">Password</label><input type="password" class="form-control form-control-custom" placeholder="••••••••"></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary-custom fw-600" onclick="showToast('Customer added successfully!','success');bootstrap.Modal.getInstance(document.getElementById('addCustomerModal')).hide()"><i class="bi bi-check-lg me-1"></i>Add Customer</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/admin.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sidebarMount').innerHTML = ADMIN_SIDEBAR('customers');
+  document.getElementById('headerMount').innerHTML = ADMIN_HEADER('Customer Management','Customers');
+  initSidebar('adminSidebar','adminOverlay');
+
+  const customers = DummyData.customers;
+  document.getElementById('statTotal').textContent = customers.length;
+  document.getElementById('statActive').textContent = customers.filter(c=>c.status==='Active').length;
+  document.getElementById('statInactive').textContent = customers.filter(c=>c.status==='Inactive').length;
+  document.getElementById('statTotalOrders').textContent = customers.reduce((s,c)=>s+c.orders,0);
+
+  const tbody = document.getElementById('customersBody');
+  customers.forEach(c => {
+    tbody.innerHTML += `<tr>
+      <td class="fw-600">${c.id}</td>
+      <td><div class="d-flex align-items-center gap-2">${randomAvatar(c.name,'sm')}<div><div class="fw-600" style="font-size:.88rem">${c.name}</div></div></div></td>
+      <td style="font-size:.88rem">${c.email}</td>
+      <td style="font-size:.88rem">${c.phone}</td>
+      <td class="fw-600">${c.orders}</td>
+      <td>${getStatusBadge(c.status)}</td>
+      <td style="font-size:.85rem">${c.joined}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary-custom" title="View" onclick="showToast('Viewing ${c.name}','info')"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm btn-outline-primary-custom" title="Edit" onclick="showToast('Editing ${c.name}','info')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger-custom" title="Delete" onclick="showConfirm({title:'Delete Customer?',message:'Remove ${c.name} permanently?',onConfirm:()=>showToast('Customer deleted','error')})"><i class="bi bi-trash"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  filterTable('searchCustomers','customersTable');
+});
+</script>
+</body>
+</html>

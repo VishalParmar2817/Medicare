@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pharmacist Management — Admin Panel</title>
+  <meta name="description" content="Manage pharmacist accounts — view licenses, status, and performance.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+<div id="sidebarMount"></div>
+<div class="admin-main">
+  <div id="headerMount"></div>
+  <div class="admin-content">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="stat-card stat-blue"><div class="stat-icon mb-2">🔬</div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total Pharmacists</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-green"><div class="stat-icon mb-2">✅</div><div class="stat-value" id="statActive">0</div><div class="stat-label">Active</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-red"><div class="stat-icon mb-2">🚫</div><div class="stat-value" id="statInactive">0</div><div class="stat-label">Inactive</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-purple"><div class="stat-icon mb-2">⭐</div><div class="stat-value">4.6</div><div class="stat-label">Avg Performance</div></div></div>
+    </div>
+
+    <!-- Pharmacist Table -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-title">All Pharmacists</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <div class="search-bar" style="max-width:220px"><i class="bi bi-search"></i><input type="text" id="searchPh" class="form-control" placeholder="Search pharmacists..."></div>
+          <button class="btn btn-primary-custom fw-600" data-bs-toggle="modal" data-bs-target="#addPhModal"><i class="bi bi-plus me-1"></i>Add Pharmacist</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-custom" id="phTable">
+          <thead><tr><th>ID</th><th>Pharmacist</th><th>Email</th><th>Phone</th><th>License No.</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="phBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Add Pharmacist Modal -->
+<div class="modal fade modal-custom" id="addPhModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700"><i class="bi bi-person-badge me-2"></i>Add New Pharmacist</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label fw-600">Full Name</label><input type="text" class="form-control form-control-custom" placeholder="Dr. Full Name"></div>
+          <div class="col-md-6"><label class="form-label fw-600">Email</label><input type="email" class="form-control form-control-custom" placeholder="email@pharma.com"></div>
+          <div class="col-md-6"><label class="form-label fw-600">Phone</label><input type="tel" class="form-control form-control-custom" placeholder="9876543210"></div>
+          <div class="col-md-6"><label class="form-label fw-600">License Number</label><input type="text" class="form-control form-control-custom" placeholder="PH-XX-YYYY-NNN"></div>
+          <div class="col-md-6"><label class="form-label fw-600">Specialization</label><input type="text" class="form-control form-control-custom" placeholder="e.g. Clinical Pharmacy"></div>
+          <div class="col-md-6"><label class="form-label fw-600">Status</label><select class="form-select form-control-custom"><option>Active</option><option>Inactive</option></select></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary-custom fw-600" onclick="showToast('Pharmacist added successfully!','success');bootstrap.Modal.getInstance(document.getElementById('addPhModal')).hide()"><i class="bi bi-check-lg me-1"></i>Add Pharmacist</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/admin.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('sidebarMount').innerHTML = ADMIN_SIDEBAR('pharmacists');
+  document.getElementById('headerMount').innerHTML = ADMIN_HEADER('Pharmacist Management','Pharmacists');
+  initSidebar('adminSidebar','adminOverlay');
+
+  const phs = DummyData.pharmacists;
+  document.getElementById('statTotal').textContent = phs.length;
+  document.getElementById('statActive').textContent = phs.filter(p=>p.status==='Active').length;
+  document.getElementById('statInactive').textContent = phs.filter(p=>p.status==='Inactive').length;
+
+  const tbody = document.getElementById('phBody');
+  phs.forEach(p => {
+    tbody.innerHTML += `<tr>
+      <td class="fw-600">${p.id}</td>
+      <td><div class="d-flex align-items-center gap-2">${randomAvatar(p.name,'sm')}<div><div class="fw-600" style="font-size:.88rem">${p.name}</div></div></div></td>
+      <td style="font-size:.88rem">${p.email}</td>
+      <td style="font-size:.88rem">${p.phone}</td>
+      <td><code style="font-size:.82rem;background:rgba(139,92,246,.08);color:#7c3aed;padding:.2em .5em;border-radius:4px">${p.license}</code></td>
+      <td>${getStatusBadge(p.status)}</td>
+      <td style="font-size:.85rem">${p.joined}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary-custom" title="View" onclick="showToast('Viewing ${p.name}','info')"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm btn-outline-primary-custom" title="Edit" onclick="showToast('Editing ${p.name}','info')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger-custom" title="Delete" onclick="showConfirm({title:'Remove Pharmacist?',message:'Remove ${p.name} from the system?',onConfirm:()=>showToast('Pharmacist removed','error')})"><i class="bi bi-trash"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  filterTable('searchPh','phTable');
+});
+</script>
+</body>
+</html>

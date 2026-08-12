@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Clothing — STYLE HUB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/customer.css">
+</head>
+<body>
+
+<!-- Announcement Bar -->
+<div class="announcement-bar">
+  🔥 UP TO 50% OFF Summer Collection | Free Shipping on Orders Over ₹999 | Code: <strong>STYLE50</strong>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg customer-navbar" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand navbar-brand-custom" href="../index.html">
+      <div class="brand-icon"><i class="bi bi-bag-heart-fill"></i></div>
+      <span>STYLE<b>HUB</b></span>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav mx-auto gap-1">
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="../index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="products.html?gender=Men" id="navMen"><i class="bi bi-gender-male me-1"></i>Men</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="products.html?gender=Women" id="navWomen"><i class="bi bi-gender-female me-1"></i>Women</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="products.html?gender=Children" id="navKids"><i class="bi bi-emoji-smile me-1"></i>Children</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom active" href="products.html"><i class="bi bi-grid me-1"></i>Shop All</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="feedback.html"><i class="bi bi-star me-1"></i>Reviews</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <a href="wishlist.html" class="icon-btn-wrap" title="Wishlist">
+          <i class="bi bi-heart"></i>
+          <span class="icon-badge wishlist-count" style="display:none">0</span>
+        </a>
+        <a href="cart.html" class="icon-btn-wrap cart-btn" title="Cart">
+          <i class="bi bi-bag"></i>
+          <span class="icon-badge cart-count" style="display:none">0</span>
+        </a>
+        <div id="navAccountArea"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN SHOP CONTENT -->
+<section class="py-4 bg-light">
+  <div class="container">
+    <!-- Breadcrumb & Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-1">
+            <li class="breadcrumb-item"><a href="../index.html">Home</a></li>
+            <li class="breadcrumb-item active" id="shopBreadcrumb">Shop Catalog</li>
+          </ol>
+        </nav>
+        <h2 class="fw-800 text-dark mb-0" id="shopTitle">All Clothing Collection</h2>
+      </div>
+      <div class="d-flex align-items-center gap-3 mt-2 mt-md-0">
+        <label class="fw-600 text-muted small me-1">Sort By:</label>
+        <select class="form-select form-select-sm rounded-3 fw-600" id="sortSelect" onchange="renderProducts()">
+          <option value="featured">Featured Trends</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating">Highest Rated</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- FILTER SIDEBAR -->
+      <div class="col-lg-3">
+        <div class="filter-card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="filter-title mb-0 border-0 p-0"><i class="bi bi-sliders me-2 text-primary"></i>Filters</div>
+            <button class="btn btn-sm btn-link text-decoration-none p-0 fw-600" onclick="resetFilters()">Reset All</button>
+          </div>
+
+          <!-- Search filter -->
+          <div class="mb-4">
+            <label class="form-label fw-700 small">Search Keywords</label>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control" placeholder="T-Shirt, Dress, Jeans..." id="searchInput" oninput="renderProducts()">
+            </div>
+          </div>
+
+          <!-- Gender Filter -->
+          <div class="mb-4">
+            <label class="form-label fw-700 small">Gender / Category</label>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" value="Men" id="chkMen" onchange="renderProducts()">
+              <label class="form-check-label fw-600" for="chkMen">Men's Clothing</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" value="Women" id="chkWomen" onchange="renderProducts()">
+              <label class="form-check-label fw-600" for="chkWomen">Women's Clothing</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" value="Children" id="chkKids" onchange="renderProducts()">
+              <label class="form-check-label fw-600" for="chkKids">Children's Fashion</label>
+            </div>
+          </div>
+
+          <!-- Size Filter -->
+          <div class="mb-4">
+            <label class="form-label fw-700 small mb-2">Available Sizes</label>
+            <div class="size-pill-grid" id="sizeFilterGrid">
+              <div class="size-pill-option" onclick="toggleSizeFilter('XS', this)">XS</div>
+              <div class="size-pill-option" onclick="toggleSizeFilter('S', this)">S</div>
+              <div class="size-pill-option" onclick="toggleSizeFilter('M', this)">M</div>
+              <div class="size-pill-option" onclick="toggleSizeFilter('L', this)">L</div>
+              <div class="size-pill-option" onclick="toggleSizeFilter('XL', this)">XL</div>
+              <div class="size-pill-option" onclick="toggleSizeFilter('XXL', this)">XXL</div>
+            </div>
+          </div>
+
+          <!-- Brand Filter -->
+          <div class="mb-4">
+            <label class="form-label fw-700 small">Brand</label>
+            <select class="form-select form-select-sm" id="brandSelect" onchange="renderProducts()">
+              <option value="">All Brands</option>
+              <option value="UrbanThread">UrbanThread</option>
+              <option value="DenimCo">DenimCo</option>
+              <option value="VogueFlex">VogueFlex</option>
+              <option value="Elegance">Elegance</option>
+              <option value="KidsCraft">KidsCraft</option>
+              <option value="RoyalAttire">RoyalAttire</option>
+              <option value="SportsPulse">SportsPulse</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCT GRID -->
+      <div class="col-lg-9">
+        <div class="row g-4" id="shopProductGrid">
+          <!-- Dynamic Products -->
+        </div>
+
+        <div id="noProductsFound" class="text-center py-5" style="display:none">
+          <i class="bi bi-search text-muted" style="font-size:3.5rem"></i>
+          <h4 class="fw-700 mt-3">No clothing items match your search</h4>
+          <p class="text-muted">Try resetting your filters or searching for another keyword like "T-Shirt" or "Dress".</p>
+          <button class="btn btn-primary-custom" onclick="resetFilters()">Reset Filters</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="customer-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <a class="navbar-brand navbar-brand-custom text-white mb-3 d-inline-flex" href="../index.html">
+          <div class="brand-icon"><i class="bi bi-bag-heart-fill"></i></div>
+          <span class="text-white">STYLE<b>HUB</b></span>
+        </a>
+        <p class="text-muted small">STYLE HUB is a premier online fashion store bringing you curated clothing collections for Men, Women & Children. Style That Defines You.</p>
+      </div>
+      <div class="col-6 col-lg-4">
+        <h5 class="footer-title">Customer Care</h5>
+        <ul class="footer-links">
+          <li><a href="orders.html">My Orders</a></li>
+          <li><a href="wishlist.html">Wishlist</a></li>
+          <li><a href="cart.html">Shopping Cart</a></li>
+          <li><a href="feedback.html">Customer Reviews</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-4">
+        <h5 class="footer-title">Portals</h5>
+        <div class="d-flex flex-column gap-2">
+          <a href="../admin/dashboard.html" class="btn btn-sm btn-outline-light text-start"><i class="bi bi-shield-lock me-2"></i>Admin Dashboard</a>
+          <a href="../staff/dashboard.html" class="btn btn-sm btn-outline-light text-start"><i class="bi bi-person-badge me-2"></i>Store Operations Portal</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script>
+let activeSelectedSizes = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Parse URL query params
+  const urlParams = new URLSearchParams(window.location.search);
+  const genderParam = urlParams.get('gender');
+  const searchParam = urlParams.get('search');
+
+  if (genderParam) {
+    if (genderParam === 'Men') document.getElementById('chkMen').checked = true;
+    if (genderParam === 'Women') document.getElementById('chkWomen').checked = true;
+    if (genderParam === 'Children') document.getElementById('chkKids').checked = true;
+    document.getElementById('shopTitle').textContent = `${genderParam}'s Collection`;
+  }
+  if (searchParam) {
+    document.getElementById('searchInput').value = searchParam;
+  }
+
+  renderProducts();
+});
+
+function toggleSizeFilter(size, el) {
+  el.classList.toggle('active');
+  if (activeSelectedSizes.includes(size)) {
+    activeSelectedSizes = activeSelectedSizes.filter(s => s !== size);
+  } else {
+    activeSelectedSizes.push(size);
+  }
+  renderProducts();
+}
+
+function resetFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('chkMen').checked = false;
+  document.getElementById('chkWomen').checked = false;
+  document.getElementById('chkKids').checked = false;
+  document.getElementById('brandSelect').value = '';
+  document.getElementById('sortSelect').value = 'featured';
+  activeSelectedSizes = [];
+  document.querySelectorAll('.size-pill-option').forEach(el => el.classList.remove('active'));
+  renderProducts();
+}
+
+function renderProducts() {
+  let list = [...DummyData.products];
+
+  // Search keyword
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (q) {
+    list = list.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+  }
+
+  // Gender checkboxes
+  const men = document.getElementById('chkMen').checked;
+  const women = document.getElementById('chkWomen').checked;
+  const kids = document.getElementById('chkKids').checked;
+  if (men || women || kids) {
+    list = list.filter(p => (men && p.gender==='Men') || (women && p.gender==='Women') || (kids && p.gender==='Children'));
+  }
+
+  // Brand
+  const brand = document.getElementById('brandSelect').value;
+  if (brand) {
+    list = list.filter(p => p.brand === brand);
+  }
+
+  // Size
+  if (activeSelectedSizes.length > 0) {
+    list = list.filter(p => p.sizes && p.sizes.some(s => activeSelectedSizes.includes(s)));
+  }
+
+  // Sort
+  const sort = document.getElementById('sortSelect').value;
+  if (sort === 'price-asc') list.sort((a,b) => a.price - b.price);
+  if (sort === 'price-desc') list.sort((a,b) => b.price - a.price);
+  if (sort === 'rating') list.sort((a,b) => b.rating - a.rating);
+
+  const grid = document.getElementById('shopProductGrid');
+  const noFound = document.getElementById('noProductsFound');
+
+  if (list.length === 0) {
+    grid.innerHTML = '';
+    noFound.style.display = 'block';
+  } else {
+    noFound.style.display = 'none';
+    grid.innerHTML = list.map(p => {
+      const isWish = Wishlist.has(p.id);
+      return `
+        <div class="col-6 col-md-4">
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-badge-discount">-${p.discount}%</span>
+              <button class="product-wishlist-btn ${isWish ? 'active' : ''}" onclick="event.stopPropagation(); Wishlist.toggle(DummyData.products.find(x => x.id === ${p.id}))" title="Wishlist">
+                <i class="bi ${isWish ? 'bi-heart-fill' : 'bi-heart'}"></i>
+              </button>
+              <a href="product-details.html?id=${p.id}">
+                <img src="${p.img}" alt="${p.name}" class="product-img">
+              </a>
+            </div>
+            <div class="product-body">
+              <div class="product-brand">${p.brand} • ${p.gender}</div>
+              <a href="product-details.html?id=${p.id}">
+                <h3 class="product-name">${p.name}</h3>
+              </a>
+              <div class="mb-2">${starRating(p.rating)}</div>
+              <div class="product-price-row">
+                <span class="product-price">${formatCurrency(p.price)}</span>
+                <span class="product-old-price">${formatCurrency(p.oldPrice)}</span>
+              </div>
+              <div class="product-actions">
+                <button class="product-add-cart-btn" onclick="Cart.add({ id: ${p.id}, name: '${p.name.replace(/'/g, "\\'")}', price: ${p.price}, brand: '${p.brand}', gender: '${p.gender}', size: '${p.sizes[0]}', color: '${p.colors[0]}', img: '${p.img}' })">
+                  <i class="bi bi-cart-plus me-1"></i>Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — Pharmacist Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/pharmacist.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="ph-layout">
+<!-- ══ SIDEBAR ══════════════════════════════════════════════════ -->
+<aside class="ph-sidebar" id="phSidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon"><i class="bi bi-capsule-pill"></i></div>
+    <div class="sidebar-brand-text">MediCare<span>Pharmacist Portal</span></div>
+  </div>
+  <div class="sidebar-user">
+    <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#1a6bcc,#00b4d8)">AK</div>
+    <div class="sidebar-user-info"><div class="sidebar-user-name">Dr. Amit Kumar</div><div class="sidebar-user-role">Senior Pharmacist</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-label">Main</div>
+    <div class="sidebar-nav-item"><a class="sidebar-nav-link active" href="dashboard.html"><i class="bi bi-speedometer2"></i>Dashboard</a></div>
+    <div class="sidebar-nav-item"><a class="sidebar-nav-link" href="medicine-management.html"><i class="bi bi-capsule"></i>Medicine Management</a></div>
+    <div class="sidebar-label">Operations</div>
+    <div class="sidebar-nav-item"><a class="sidebar-nav-link" href="inventory.html"><i class="bi bi-boxes"></i>Inventory & Alerts</a></div>
+    <div class="sidebar-nav-item"><a class="sidebar-nav-link" href="order-management.html"><i class="bi bi-bag-check"></i>Order Management<span class="nav-badge">5</span></a></div>
+    <div class="sidebar-nav-item"><a class="sidebar-nav-link" href="prescription-billing.html"><i class="bi bi-file-medical-fill"></i>Rx & Billing<span class="nav-badge">3</span></a></div>
+    <div class="sidebar-label">Account</div>
+    <div class="sidebar-nav-item"><a class="sidebar-nav-link" href="#"><i class="bi bi-person-circle"></i>My Profile</a></div>
+    <div class="sidebar-nav-item"><a class="sidebar-nav-link" href="../customer/login.html"><i class="bi bi-box-arrow-right"></i>Logout</a></div>
+    <div class="sidebar-label">Portal Access</div>
+    <div class="sidebar-nav-item"><a class="sidebar-nav-link portal-link" href="../admin/dashboard.html"><i class="bi bi-shield-lock-fill"></i>Admin Portal</a></div>
+    <div class="sidebar-nav-item"><a class="sidebar-nav-link portal-link" href="../index.html"><i class="bi bi-shop"></i>Customer Portal</a></div>
+  </nav>
+  <div class="sidebar-footer"><div class="sidebar-version">MediCare PMS v2.4.1</div></div>
+</aside>
+<div class="sidebar-overlay" id="phOverlay"></div>
+
+<!-- ══ MAIN ═════════════════════════════════════════════════════ -->
+<div class="ph-main">
+  <!-- Header -->
+  <header class="ph-header">
+    <div class="ph-header-left">
+      <button class="sidebar-toggle" onclick="document.getElementById('phSidebar').classList.toggle('open');document.getElementById('phOverlay').classList.toggle('visible')"><i class="bi bi-list"></i></button>
+      <div>
+        <div class="page-title">Dashboard</div>
+        <ol class="breadcrumb-custom"><li>Home</li><li><i class="bi bi-chevron-right small"></i></li><li>Dashboard</li></ol>
+      </div>
+    </div>
+    <div class="ph-header-right">
+      <div class="search-bar" style="max-width:200px"><i class="bi bi-search"></i><input type="text" class="form-control" placeholder="Search..."></div>
+      <div class="header-icon-btn" title="Notifications"><i class="bi bi-bell"></i><span class="notif-dot"></span></div>
+      <div class="dropdown">
+        <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
+          <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#1a6bcc,#00b4d8)">AK</div>
+          <div class="d-none d-md-block"><div style="font-size:.82rem;font-weight:600">Dr. Amit Kumar</div></div>
+          <i class="bi bi-chevron-down text-muted small"></i>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius:12px">
+          <li><a class="dropdown-item py-2" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item py-2 text-danger" href="../customer/login.html"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="ph-content">
+    <!-- Welcome -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <div><h5 class="fw-700 mb-1">Good Morning, Dr. Amit! 👋</h5><p class="text-muted mb-0" style="font-size:.88rem">Here's what's happening at MediCare today</p></div>
+      <div class="d-flex gap-2"><button class="btn btn-primary-custom fw-600"><i class="bi bi-plus me-1"></i>Add Medicine</button><button class="btn btn-outline-primary-custom fw-600"><i class="bi bi-download me-1"></i>Export</button></div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="stat-card stat-blue"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon">💊</div><span class="badge bg-white bg-opacity-25 text-white" style="font-size:.7rem">+8%</span></div><div class="stat-value">1,284</div><div class="stat-label">Total Medicines</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-green"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon">📦</div><span class="badge bg-white bg-opacity-25 text-white" style="font-size:.7rem">+12%</span></div><div class="stat-value">58</div><div class="stat-label">Orders Today</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-orange"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon">⚠️</div><span class="badge bg-white bg-opacity-25 text-white" style="font-size:.7rem">+3</span></div><div class="stat-value">7</div><div class="stat-label">Stock Alerts</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-cyan"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon">💰</div><span class="badge bg-white bg-opacity-25 text-white" style="font-size:.7rem">+18%</span></div><div class="stat-value">₹84K</div><div class="stat-label">Revenue Today</div></div></div>
+    </div>
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="stat-card stat-purple"><div class="stat-icon mb-2">📋</div><div class="stat-value">3</div><div class="stat-label">Pending Prescriptions</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-red"><div class="stat-icon mb-2">⏰</div><div class="stat-value">2</div><div class="stat-label">Expired Medicines</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-teal"><div class="stat-icon mb-2">👤</div><div class="stat-value">342</div><div class="stat-label">Active Customers</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-pink"><div class="stat-icon mb-2">⭐</div><div class="stat-value">4.7</div><div class="stat-label">Avg Rating</div></div></div>
+    </div>
+
+    <!-- Charts & Tables -->
+    <div class="row g-3 mb-4">
+      <div class="col-lg-8">
+        <div class="chart-container">
+          <div class="chart-title">Sales Revenue — Last 7 Days</div>
+          <canvas id="salesChart" height="100"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="chart-container">
+          <div class="chart-title">Sales by Category</div>
+          <canvas id="catChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders & Stock Alerts -->
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="data-card">
+          <div class="data-card-header">
+            <div class="data-card-title">Recent Orders</div>
+            <a href="order-management.html" class="btn btn-sm btn-outline-primary-custom fw-600">View All</a>
+          </div>
+          <div class="table-wrap">
+            <table class="table-custom">
+              <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td class="fw-600 text-primary">#ORD-1042</td><td><div class="d-flex align-items-center gap-2"><div class="avatar avatar-sm" style="background:#1a6bcc;font-size:.7rem">PS</div>Priya Sharma</div></td><td>3 items</td><td class="fw-600">₹424</td><td><span class="badge-custom badge-warning">Pending</span></td><td><button class="btn btn-sm btn-primary-custom" onclick="showToast('Order details opened','info')">View</button></td></tr>
+                <tr><td class="fw-600 text-primary">#ORD-1041</td><td><div class="d-flex align-items-center gap-2"><div class="avatar avatar-sm" style="background:#22c55e;font-size:.7rem">RM</div>Rahul Mehta</div></td><td>2 items</td><td class="fw-600">₹720</td><td><span class="badge-custom badge-info">Processing</span></td><td><button class="btn btn-sm btn-primary-custom" onclick="showToast('Order details opened','info')">View</button></td></tr>
+                <tr><td class="fw-600 text-primary">#ORD-1040</td><td><div class="d-flex align-items-center gap-2"><div class="avatar avatar-sm" style="background:#8b5cf6;font-size:.7rem">AS</div>Anita Singh</div></td><td>5 items</td><td class="fw-600">₹1,240</td><td><span class="badge-custom badge-success">Delivered</span></td><td><button class="btn btn-sm btn-primary-custom" onclick="showToast('Order details opened','info')">View</button></td></tr>
+                <tr><td class="fw-600 text-primary">#ORD-1039</td><td><div class="d-flex align-items-center gap-2"><div class="avatar avatar-sm" style="background:#f59e0b;font-size:.7rem">VP</div>Vikram Patel</div></td><td>1 item</td><td class="fw-600">₹299</td><td><span class="badge-custom badge-success">Delivered</span></td><td><button class="btn btn-sm btn-primary-custom" onclick="showToast('Order details opened','info')">View</button></td></tr>
+                <tr><td class="fw-600 text-primary">#ORD-1038</td><td><div class="d-flex align-items-center gap-2"><div class="avatar avatar-sm" style="background:#ec4899;font-size:.7rem">NG</div>Neha Gupta</div></td><td>4 items</td><td class="fw-600">₹850</td><td><span class="badge-custom badge-danger">Cancelled</span></td><td><button class="btn btn-sm btn-primary-custom" onclick="showToast('Order details opened','info')">View</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="data-card">
+          <div class="data-card-header"><div class="data-card-title">⚠️ Stock Alerts</div><a href="stock-alerts.html" class="btn btn-sm btn-outline-primary-custom">View All</a></div>
+          <div class="p-3 d-flex flex-column gap-2">
+            <div class="stock-alert-card low"><div><div class="fw-600" style="font-size:.85rem">Salbutamol Inhaler</div><small class="text-muted">Current: 30 | Min: 50</small></div><span class="badge-custom badge-warning">Low</span></div>
+            <div class="stock-alert-card exp"><div><div class="fw-600" style="font-size:.85rem">Penicillin 250mg</div><small class="text-muted">Expired: Oct 2024</small></div><span class="badge-custom badge-danger">Expired</span></div>
+            <div class="stock-alert-card near"><div><div class="fw-600" style="font-size:.85rem">Doxycycline 100mg</div><small class="text-muted">Expires in 21 days</small></div><span class="badge-custom badge-info">Near Expiry</span></div>
+            <div class="stock-alert-card low"><div><div class="fw-600" style="font-size:.85rem">Atorvastatin 20mg</div><small class="text-muted">Current: 45 | Min: 60</small></div><span class="badge-custom badge-warning">Low</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar('phSidebar', 'phOverlay');
+  // Sales Chart
+  new Chart(document.getElementById('salesChart'), {
+    type: 'line',
+    data: {
+      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: [42000, 58000, 51000, 74000, 63000, 89000, 84000],
+        borderColor: '#1a6bcc',
+        backgroundColor: 'rgba(26,107,204,.08)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#1a6bcc',
+        pointRadius: 4,
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(0,0,0,.05)' }, ticks: { callback: v => '₹' + (v/1000) + 'K' } }, x: { grid: { display: false } } } }
+  });
+  // Category Chart
+  new Chart(document.getElementById('catChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Pain Relief','Antibiotics','Vitamins','Cardiology','Diabetes','Others'],
+      datasets: [{ data: [28, 22, 18, 14, 10, 8], backgroundColor: ['#1a6bcc','#22c55e','#f59e0b','#ef4444','#8b5cf6','#00b4d8'], borderWidth: 0 }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } } }, cutout: '65%' }
+  });
+});
+</script>
+<script>document.documentElement.classList.add('layout-locked');document.body.classList.add('layout-locked');</script>
+</body>
+</html>

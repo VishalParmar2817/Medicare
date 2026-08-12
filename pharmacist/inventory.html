@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Inventory Management — Pharmacist Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/pharmacist.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="ph-layout" id="layout"></div>
+
+<!-- Adjust Stock Modal -->
+<div class="modal fade modal-custom" id="adjustModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700">Adjust Stock</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="mb-3"><label class="form-label fw-600 small">Medicine</label><input type="text" class="form-control form-control-custom" id="adjMedName" readonly></div>
+        <div class="mb-3"><label class="form-label fw-600 small">Current Stock</label><input type="text" class="form-control form-control-custom" id="adjCurrent" readonly></div>
+        <div class="mb-3"><label class="form-label fw-600 small">Adjustment Type</label><select class="form-control form-control-custom" id="adjType"><option>Add Stock</option><option>Remove Stock</option><option>Set Stock</option></select></div>
+        <div class="mb-3"><label class="form-label fw-600 small">Quantity</label><input type="number" class="form-control form-control-custom" id="adjQty" placeholder="0"></div>
+        <div class="mb-3"><label class="form-label fw-600 small">Reason</label><textarea class="form-control form-control-custom" rows="2" placeholder="Reason for adjustment"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary-custom fw-600" onclick="saveAdjust()"><i class="bi bi-check2 me-1"></i>Update Stock</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/pharmacist.js"></script>
+<script>
+const totalStock = DummyData.medicines.reduce((s,m) => s + m.stock, 0);
+const lowStock = DummyData.medicines.filter(m => m.stock < 50).length;
+const inStock = DummyData.medicines.filter(m => m.stock > 0).length;
+const outOfStock = DummyData.medicines.filter(m => m.stock === 0).length;
+
+document.getElementById('layout').innerHTML = PH_SIDEBAR('inventory') + `
+<div class="ph-main">
+  ${PH_HEADER('Inventory Management','Inventory')}
+  <div class="ph-content">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="stat-card stat-blue"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-boxes"></i></div><span class="stat-trend">Total</span></div><div class="stat-value">${totalStock.toLocaleString()}</div><div class="stat-label">Total Stock Units</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-green"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div><span class="stat-trend"><i class="bi bi-arrow-up me-1"></i>Good</span></div><div class="stat-value">${inStock}</div><div class="stat-label">In Stock Items</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-orange"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div><span class="stat-trend">Action Needed</span></div><div class="stat-value">${lowStock}</div><div class="stat-label">Low Stock Items</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-red"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon"><i class="bi bi-x-circle-fill"></i></div><span class="stat-trend">Critical</span></div><div class="stat-value">${outOfStock}</div><div class="stat-label">Out of Stock</div></div></div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-lg-8">
+        <div class="chart-container">
+          <div class="chart-title">Stock Levels by Medicine</div>
+          <canvas id="stockChart" height="100"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="chart-container">
+          <div class="chart-title">Stock Distribution by Category</div>
+          <canvas id="stockCatChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-title"><i class="bi bi-boxes me-2 text-primary"></i>Inventory Overview</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <div class="search-bar" style="max-width:220px"><i class="bi bi-search"></i><input type="text" class="form-control" id="invSearch" placeholder="Search inventory..."></div>
+          <select class="form-select form-select-sm" style="width:130px;font-family:var(--font-main)" id="invStockFilter">
+            <option value="">All Stock</option>
+            <option value="low">Low Stock</option>
+            <option value="ok">Normal</option>
+            <option value="high">High Stock</option>
+          </select>
+          <button class="btn btn-outline-primary-custom fw-600"><i class="bi bi-download me-1"></i>Export CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-custom" id="invTable">
+          <thead><tr><th>#</th><th>Medicine</th><th>Category</th><th>Stock Level</th><th>Units</th><th>Min Level</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr></thead>
+          <tbody id="invTableBody"></tbody>
+        </table>
+      </div>
+      <div class="data-card-footer">
+        <span class="text-muted small">Showing <span id="invCount"></span> items</span>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+const invData = DummyData.medicines.map(m => ({
+  ...m, minStock: Math.floor(m.stock * 0.4) + 10,
+  lastUpdated: ['2 hrs ago','5 hrs ago','Yesterday','3 days ago','1 week ago'][Math.floor(Math.random()*5)]
+}));
+
+function getStockStatus(m) {
+  if (m.stock === 0) return { cls:'badge-danger', text:'Out of Stock' };
+  if (m.stock < 50) return { cls:'badge-warning', text:'Low Stock' };
+  if (m.stock > 150) return { cls:'badge-success', text:'Well Stocked' };
+  return { cls:'badge-info', text:'Normal' };
+}
+
+function renderInvTable(items) {
+  document.getElementById('invCount').textContent = items.length;
+  document.getElementById('invTableBody').innerHTML = items.map((m, i) => {
+    const st = getStockStatus(m);
+    const pct = Math.min((m.stock / 300) * 100, 100);
+    return `
+    <tr>
+      <td class="text-muted small">${String(i+1).padStart(3,'0')}</td>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <span style="font-size:1.3rem">${m.img}</span>
+          <div><div class="fw-600" style="font-size:.88rem">${m.name}</div><small class="text-muted">${m.brand}</small></div>
+        </div>
+      </td>
+      <td><span class="badge-custom badge-info">${m.category}</span></td>
+      <td style="min-width:120px">
+        <div class="progress" style="height:8px;border-radius:4px">
+          <div class="progress-bar ${m.stock>100?'bg-success':m.stock>50?'bg-warning':'bg-danger'}" style="width:${pct}%;border-radius:4px"></div>
+        </div>
+      </td>
+      <td class="fw-600">${m.stock}</td>
+      <td class="text-muted">${m.minStock}</td>
+      <td><span class="badge-custom ${st.cls}">${st.text}</span></td>
+      <td class="text-muted small">${m.lastUpdated}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="adjustStock(${m.id})" title="Adjust Stock"><i class="bi bi-arrow-repeat"></i></button>
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="showToast('Stock history viewed','info')" title="History"><i class="bi bi-clock-history"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function adjustStock(id) {
+  const m = invData.find(x => x.id === id);
+  document.getElementById('adjMedName').value = m.name;
+  document.getElementById('adjCurrent').value = m.stock + ' units';
+  new bootstrap.Modal(document.getElementById('adjustModal')).show();
+}
+function saveAdjust() { showLoader(); setTimeout(() => { hideLoader(); bootstrap.Modal.getInstance(document.getElementById('adjustModal')).hide(); showToast('Stock updated successfully!','success'); }, 800); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar('phSidebar','phOverlay');
+  renderInvTable(invData);
+
+  document.getElementById('invSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    renderInvTable(invData.filter(m => m.name.toLowerCase().includes(q) || m.brand.toLowerCase().includes(q) || m.category.toLowerCase().includes(q)));
+  });
+
+  document.getElementById('invStockFilter').addEventListener('change', function() {
+    const v = this.value;
+    if (!v) return renderInvTable(invData);
+    if (v === 'low') renderInvTable(invData.filter(m => m.stock < 50));
+    else if (v === 'ok') renderInvTable(invData.filter(m => m.stock >= 50 && m.stock <= 150));
+    else renderInvTable(invData.filter(m => m.stock > 150));
+  });
+
+  // Stock Levels Chart
+  new Chart(document.getElementById('stockChart'), {
+    type: 'bar',
+    data: {
+      labels: DummyData.medicines.map(m => m.name.split(' ')[0]),
+      datasets: [{
+        label: 'Current Stock',
+        data: DummyData.medicines.map(m => m.stock),
+        backgroundColor: DummyData.medicines.map(m => m.stock > 100 ? 'rgba(34,197,94,.7)' : m.stock > 50 ? 'rgba(245,158,11,.7)' : 'rgba(239,68,68,.7)'),
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(0,0,0,.05)' }, beginAtZero: true }, x: { grid: { display: false } } } }
+  });
+
+  // Category Distribution
+  const catStock = {};
+  DummyData.medicines.forEach(m => { catStock[m.category] = (catStock[m.category] || 0) + m.stock; });
+  new Chart(document.getElementById('stockCatChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(catStock),
+      datasets: [{ data: Object.values(catStock), backgroundColor: ['#1a6bcc','#22c55e','#f59e0b','#ef4444','#8b5cf6','#00b4d8','#ec4899','#14b8a6'], borderWidth: 0 }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } } }, cutout: '65%' }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Browse Medicines — MediCare Pharmacy</title>
+  <meta name="description" content="Browse thousands of medicines with filters by category, brand, price and more.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/customer.css">
+</head>
+<body>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg customer-navbar">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand navbar-brand-custom" href="../index.html">
+      <div class="brand-icon"><i class="bi bi-capsule-pill"></i></div>
+      <span>Medi<b>Care</b></span>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain2">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain2">
+      <ul class="navbar-nav mx-auto gap-1">
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="../index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom active" href="medicines.html"><i class="bi bi-capsule me-1"></i>Medicines</a></li>
+
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="orders.html"><i class="bi bi-bag-check me-1"></i>Orders</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="feedback.html"><i class="bi bi-star me-1"></i>Feedback</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <div class="search-bar d-none d-lg-block" style="max-width:240px">
+          <i class="bi bi-search"></i>
+          <input type="text" class="form-control" id="globalSearch" placeholder="Search medicines...">
+        </div>
+        <a href="cart.html" class="cart-btn">
+          <i class="bi bi-cart3"></i>
+          <span class="cart-count" id="navCartCount">0</span>
+        </a>
+        <div id="navAccountArea"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="bg-white border-bottom py-2 px-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb-custom"><li><a href="../index.html">Home</a></li><li><i class="bi bi-chevron-right small"></i></li><li>Medicines</li></ol>
+  </nav>
+</div>
+
+<div class="container-fluid px-4 py-4">
+  <div class="row g-4">
+    <!-- ── FILTER SIDEBAR ── -->
+    <div class="col-lg-3">
+      <div class="filter-sidebar">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-700 mb-0">Filters</h6>
+          <button class="btn btn-sm text-primary p-0 border-0 fw-600" onclick="clearFilters()">Clear All</button>
+        </div>
+        <!-- Search Filter -->
+        <div class="filter-section">
+          <div class="filter-title">Search</div>
+          <div class="search-bar" style="max-width:100%">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control" id="searchFilter" placeholder="Medicine name...">
+          </div>
+        </div>
+        <!-- Category -->
+        <div class="filter-section">
+          <div class="filter-title">Category</div>
+          <div id="catFilters" class="d-flex flex-column gap-2"></div>
+        </div>
+        <!-- Brand -->
+        <div class="filter-section">
+          <div class="filter-title">Brand</div>
+          <div id="brandFilters" class="d-flex flex-column gap-2"></div>
+        </div>
+        <!-- Price Range -->
+        <div class="filter-section">
+          <div class="filter-title">Price Range</div>
+          <input type="range" class="form-range" id="priceRange" min="0" max="1000" value="1000" oninput="filterByPrice(this.value)">
+          <div class="d-flex justify-content-between small text-muted">
+            <span>₹0</span><span id="priceLabel">₹1000</span>
+          </div>
+        </div>
+        <!-- Availability -->
+        <div class="filter-section">
+          <div class="filter-title">Availability</div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="inStockFilter" checked><label class="form-check-label small" for="inStockFilter">In Stock</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="rxFilter"><label class="form-check-label small" for="rxFilter">Prescription Required</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="offerFilter"><label class="form-check-label small" for="offerFilter">On Offer</label></div>
+        </div>
+        <!-- Rating Filter -->
+        <div>
+          <div class="filter-title">Minimum Rating</div>
+          <select class="form-select form-control-custom" id="ratingFilter" style="font-size:.85rem">
+            <option value="0">Any Rating</option>
+            <option value="4">4★ & above</option>
+            <option value="3">3★ & above</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PRODUCT GRID ── -->
+    <div class="col-lg-9">
+      <!-- Header -->
+      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+          <h5 class="fw-700 mb-0">All Medicines</h5>
+          <small class="text-muted" id="resultCount">Showing 12 products</small>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <select class="form-select form-select-sm" id="sortSelect" style="width:160px;font-family:var(--font-main)">
+            <option>Sort by: Popular</option>
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+            <option>Rating</option>
+            <option>Newest</option>
+          </select>
+          <button class="btn btn-sm border" id="viewGrid" onclick="setView('grid')"><i class="bi bi-grid-3x3-gap"></i></button>
+          <button class="btn btn-sm border" id="viewList" onclick="setView('list')"><i class="bi bi-list-ul"></i></button>
+        </div>
+      </div>
+      <div class="row g-3" id="medGrid"></div>
+      <!-- Pagination -->
+      <nav class="mt-4 d-flex justify-content-center">
+        <ul class="pagination pagination-custom mb-0">
+          <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a></li>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- MEDICINE DETAIL MODAL -->
+<div class="modal fade modal-custom" id="medModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-700" id="medModalTitle">Medicine Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="medModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script>
+let currentMeds = [...DummyData.medicines];
+
+function renderMeds(meds) {
+  const grid = document.getElementById('medGrid');
+  document.getElementById('resultCount').textContent = `Showing ${meds.length} products`;
+  if (!meds.length) {
+    grid.innerHTML = `<div class="col-12"><div class="empty-state"><i class="bi bi-search"></i><h5>No medicines found</h5><p>Try adjusting your filters</p></div></div>`;
+    return;
+  }
+  grid.innerHTML = meds.map(med => `
+    <div class="col-6 col-md-4 col-xl-3 anim-fade-up">
+      <div class="medicine-card">
+        <div class="medicine-img-wrap" style="cursor:pointer" onclick="viewDetail(${med.id})">
+          <span style="font-size:3.5rem">${med.img}</span>
+          <div class="medicine-badge-overlay"><span class="price-discount">-${med.discount}%</span></div>
+          <button class="medicine-wishlist" onclick="event.stopPropagation();toggleWish(this)"><i class="bi bi-heart"></i></button>
+          ${med.rxRequired ? '<span class="badge bg-danger position-absolute bottom-0 start-0 m-2" style="font-size:.65rem">Rx</span>' : ''}
+        </div>
+        <div class="medicine-body">
+          <div class="medicine-brand">${med.brand}</div>
+          <div class="medicine-name" style="cursor:pointer" onclick="viewDetail(${med.id})">${med.name}</div>
+          <div class="mb-1"><span class="star-rating" style="font-size:.75rem">${'<i class="bi bi-star-fill"></i>'.repeat(Math.floor(med.rating))}</span><small class="text-muted" style="font-size:.72rem"> (${med.rating})</small></div>
+          <div><span class="price-tag">₹${med.price}</span><span class="price-old ms-1">₹${med.oldPrice}</span></div>
+        </div>
+        <div class="medicine-footer">
+          <span class="stock-indicator ${med.stock > 50 ? 'stock-in-stock' : 'stock-low-stock'}"><span class="stock-dot"></span>${med.stock > 50 ? 'In Stock' : 'Low Stock'}</span>
+          <button class="add-cart-btn" onclick="addCart(${med.id})"><i class="bi bi-cart-plus"></i> Add</button>
+        </div>
+      </div>
+    </div>`).join('');
+  initScrollAnimations();
+}
+
+function viewDetail(id) {
+  const med = DummyData.medicines.find(m => m.id === id);
+  document.getElementById('medModalTitle').textContent = med.name;
+  document.getElementById('medModalBody').innerHTML = `
+    <div class="row g-3">
+      <div class="col-md-4 text-center">
+        <div style="background:linear-gradient(135deg,#f0f7ff,#e8f4fd);border-radius:12px;padding:2rem;font-size:5rem">${med.img}</div>
+        <div class="mt-3"><span class="price-tag" style="font-size:1.4rem">₹${med.price}</span><span class="price-old ms-2">₹${med.oldPrice}</span></div>
+        <div class="mt-1 star-rating">${'<i class="bi bi-star-fill"></i>'.repeat(Math.floor(med.rating))}<small class="ms-1 text-muted">(${med.rating})</small></div>
+        ${med.rxRequired ? '<div class="alert-custom alert-warning-custom mt-2" style="font-size:.8rem"><i class="bi bi-exclamation-triangle-fill"></i>Prescription Required</div>' : ''}
+        <div class="d-flex gap-2 mt-3">
+          <div class="qty-control"><button class="qty-btn" onclick="chQty(-1)">-</button><input class="qty-input" id="qtyInp" value="1" type="number" min="1"><button class="qty-btn" onclick="chQty(1)">+</button></div>
+          <button class="btn btn-primary-custom flex-1" onclick="addCart(${med.id});new bootstrap.Modal(document.getElementById('medModal')).hide()"><i class="bi bi-cart-plus me-1"></i>Add to Cart</button>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <span class="badge-custom badge-primary">${med.category}</span>
+        <span class="badge-custom badge-info ms-1">${med.brand}</span>
+        <h5 class="fw-700 mt-2 mb-1">${med.name}</h5>
+        <p class="text-muted" style="font-size:.9rem">${med.description}</p>
+        <hr>
+        <div class="row g-2 mb-3">
+          <div class="col-6"><small class="text-muted d-block">Category</small><strong style="font-size:.9rem">${med.category}</strong></div>
+          <div class="col-6"><small class="text-muted d-block">Brand</small><strong style="font-size:.9rem">${med.brand}</strong></div>
+          <div class="col-6"><small class="text-muted d-block">Stock</small><strong style="font-size:.9rem">${med.stock} units</strong></div>
+          <div class="col-6"><small class="text-muted d-block">Rx Required</small><strong style="font-size:.9rem">${med.rxRequired ? 'Yes' : 'No'}</strong></div>
+        </div>
+        <div class="mb-2"><strong style="font-size:.88rem">Dosage & Usage:</strong><p style="font-size:.85rem;color:var(--dark-3)">Take as directed by your physician. Do not exceed the recommended dose. Store below 25°C away from light and moisture.</p></div>
+        <div class="mb-2"><strong style="font-size:.88rem">Side Effects:</strong><p style="font-size:.85rem;color:var(--dark-3)">Common: nausea, headache, dizziness. Consult a doctor if severe reactions occur.</p></div>
+        <div class="mb-2"><strong style="font-size:.88rem">Ingredients:</strong><p style="font-size:.85rem;color:var(--dark-3)">Active ingredient: ${med.name.split(' ')[0]}. Inactive: microcrystalline cellulose, stearic acid, silicon dioxide.</p></div>
+      </div>
+    </div>`;
+  new bootstrap.Modal(document.getElementById('medModal')).show();
+}
+
+function chQty(d) {
+  const inp = document.getElementById('qtyInp');
+  inp.value = Math.max(1, parseInt(inp.value) + d);
+}
+function addCart(id) {
+  const m = DummyData.medicines.find(x => x.id === id);
+  if (m) Cart.add({ id:m.id, name:m.name, price:m.price, img:m.img, brand:m.brand });
+}
+function toggleWish(btn) {
+  btn.classList.toggle('active');
+  btn.querySelector('i').className = btn.classList.contains('active') ? 'bi bi-heart-fill' : 'bi bi-heart';
+  showToast(btn.classList.contains('active') ? 'Added to wishlist!' : 'Removed from wishlist', btn.classList.contains('active') ? 'info' : 'warning');
+}
+function setView(v) {
+  document.getElementById('medGrid').className = v === 'list' ? 'row g-2' : 'row g-3';
+  document.getElementById('viewGrid').classList.toggle('btn-primary', v==='grid');
+  document.getElementById('viewList').classList.toggle('btn-primary', v==='list');
+}
+function filterByPrice(val) { document.getElementById('priceLabel').textContent = '₹'+val; }
+function clearFilters() { document.getElementById('searchFilter').value=''; renderMeds(DummyData.medicines); showToast('Filters cleared','info'); }
+
+// Category & Brand filter checkboxes
+document.addEventListener('DOMContentLoaded', () => {
+  const cats = [...new Set(DummyData.medicines.map(m => m.category))];
+  document.getElementById('catFilters').innerHTML = cats.map(c => `
+    <div class="form-check"><input class="form-check-input cat-filter" type="checkbox" value="${c}" id="cat_${c}" checked>
+    <label class="form-check-label small" for="cat_${c}">${c}</label></div>`).join('');
+  const brands = [...new Set(DummyData.medicines.map(m => m.brand))];
+  document.getElementById('brandFilters').innerHTML = brands.map(b => `
+    <div class="form-check"><input class="form-check-input brand-filter" type="checkbox" value="${b}" id="br_${b}" checked>
+    <label class="form-check-label small" for="br_${b}">${b}</label></div>`).join('');
+  renderMeds(DummyData.medicines);
+  document.getElementById('searchFilter').addEventListener('input', applyFilters);
+  document.querySelectorAll('.cat-filter,.brand-filter').forEach(el => el.addEventListener('change', applyFilters));
+  document.getElementById('sortSelect').addEventListener('change', applyFilters);
+});
+
+function applyFilters() {
+  const q = document.getElementById('searchFilter').value.toLowerCase();
+  const cats = [...document.querySelectorAll('.cat-filter:checked')].map(e => e.value);
+  const brands = [...document.querySelectorAll('.brand-filter:checked')].map(e => e.value);
+  const sort = document.getElementById('sortSelect').value;
+  const maxPrice = parseInt(document.getElementById('priceRange').value);
+  let meds = DummyData.medicines.filter(m =>
+    (!q || m.name.toLowerCase().includes(q) || m.brand.toLowerCase().includes(q)) &&
+    cats.includes(m.category) && brands.includes(m.brand) && m.price <= maxPrice
+  );
+  if (sort.includes('Low to High')) meds.sort((a,b) => a.price - b.price);
+  else if (sort.includes('High to Low')) meds.sort((a,b) => b.price - a.price);
+  else if (sort.includes('Rating')) meds.sort((a,b) => b.rating - a.rating);
+  renderMeds(meds);
+}
+</script>
+</body>
+</html>

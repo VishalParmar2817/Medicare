@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Prescription Verification — Pharmacist Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/pharmacist.css">
+</head>
+<body>
+<div class="ph-layout" id="layout"></div>
+
+<!-- Prescription Detail Modal -->
+<div class="modal fade modal-custom" id="rxModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700" id="rxModalTitle">Prescription Details</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="rxModalBody"></div>
+      <div class="modal-footer" id="rxModalFooter"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/pharmacist.js"></script>
+<script>
+const prescriptions = [
+  { id:'RX-2025-001', customer:'Priya Sharma', phone:'9876543210', doctor:'Dr. Ramesh Gupta', hospital:'Apollo Hospital, Mumbai', date:'25 Jul 2025', status:'Pending', medicines:['Amoxicillin 250mg (x14)','Omeprazole 20mg (x7)','Cetirizine 10mg (x10)'], notes:'Post-surgery infection prevention', urgent:true },
+  { id:'RX-2025-002', customer:'Vikram Patel', phone:'9000123456', doctor:'Dr. Sneha Iyer', hospital:'Max Hospital, Delhi', date:'24 Jul 2025', status:'Pending', medicines:['Metformin 500mg (x30)','Atorvastatin 20mg (x15)'], notes:'Diabetes + cholesterol management', urgent:false },
+  { id:'RX-2025-003', customer:'Neha Gupta', phone:'9988776655', doctor:'Dr. Rohan Verma', hospital:'Fortis Clinic, Pune', date:'24 Jul 2025', status:'Pending', medicines:['Salbutamol Inhaler (x1)','Montelukast 10mg (x30)'], notes:'Asthma management', urgent:true },
+  { id:'RX-2025-004', customer:'Rahul Mehta', phone:'9123456789', doctor:'Dr. Amit Kumar', hospital:'Medanta, Gurgaon', date:'23 Jul 2025', status:'Verified', medicines:['Pantoprazole 40mg (x14)','Domperidone 10mg (x14)'], notes:'GERD treatment', urgent:false },
+  { id:'RX-2025-005', customer:'Anita Singh', phone:'9876012345', doctor:'Dr. Meera Shah', hospital:'KEM Hospital, Mumbai', date:'23 Jul 2025', status:'Verified', medicines:['Amlodipine 5mg (x30)','Telmisartan 40mg (x30)'], notes:'Hypertension control', urgent:false },
+  { id:'RX-2025-006', customer:'Arjun Rao', phone:'8877665544', doctor:'Dr. Priya Mehta', hospital:'Manipal Hospital, Bangalore', date:'22 Jul 2025', status:'Rejected', medicines:['Tramadol 50mg (x20)'], notes:'Expired prescription — dated over 6 months ago', urgent:false },
+  { id:'RX-2025-007', customer:'Sunita Desai', phone:'7766554433', doctor:'Dr. Kiran Joshi', hospital:'Lilavati Hospital, Mumbai', date:'22 Jul 2025', status:'Verified', medicines:['Vitamin D3 60000IU (x4)','Calcium Citrate 500mg (x30)'], notes:'Osteoporosis prevention', urgent:false },
+  { id:'RX-2025-008', customer:'Kiran Joshi', phone:'6655443322', doctor:'Dr. Ramesh Gupta', hospital:'Apollo Hospital, Mumbai', date:'21 Jul 2025', status:'Dispensed', medicines:['Azithromycin 500mg (x3)','Paracetamol 500mg (x10)'], notes:'Upper respiratory infection', urgent:false },
+];
+
+const pending = prescriptions.filter(p => p.status === 'Pending').length;
+const verified = prescriptions.filter(p => p.status === 'Verified').length;
+const rejected = prescriptions.filter(p => p.status === 'Rejected').length;
+const dispensed = prescriptions.filter(p => p.status === 'Dispensed').length;
+
+document.getElementById('layout').innerHTML = PH_SIDEBAR('prescription') + `
+<div class="ph-main">
+  ${PH_HEADER('Prescription Verification','Prescriptions')}
+  <div class="ph-content">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="stat-card stat-orange"><div class="d-flex justify-content-between align-items-start mb-2"><div class="stat-icon">📋</div><span class="badge bg-white bg-opacity-25 text-white" style="font-size:.7rem">Needs Review</span></div><div class="stat-value">${pending}</div><div class="stat-label">Pending Verification</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-green"><div class="stat-icon mb-2">✅</div><div class="stat-value">${verified}</div><div class="stat-label">Verified</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-red"><div class="stat-icon mb-2">❌</div><div class="stat-value">${rejected}</div><div class="stat-label">Rejected</div></div></div>
+      <div class="col-6 col-lg-3"><div class="stat-card stat-cyan"><div class="stat-icon mb-2">💊</div><div class="stat-value">${dispensed}</div><div class="stat-label">Dispensed</div></div></div>
+    </div>
+
+    <!-- Urgent Alert -->
+    ${prescriptions.filter(p => p.urgent && p.status === 'Pending').length > 0 ? `
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" style="border-radius:12px;border:none;background:rgba(245,158,11,.1)">
+      <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size:1.3rem"></i>
+      <div><strong>${prescriptions.filter(p => p.urgent && p.status === 'Pending').length} urgent prescription(s)</strong> require immediate verification</div>
+    </div>` : ''}
+
+    <!-- Prescription Cards -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-sm btn-primary-custom fw-600 rx-tab active" data-filter="">All (${prescriptions.length})</button>
+          <button class="btn btn-sm btn-outline-primary-custom fw-600 rx-tab" data-filter="Pending">Pending (${pending})</button>
+          <button class="btn btn-sm btn-outline-primary-custom fw-600 rx-tab" data-filter="Verified">Verified (${verified})</button>
+          <button class="btn btn-sm btn-outline-primary-custom fw-600 rx-tab" data-filter="Dispensed">Dispensed (${dispensed})</button>
+          <button class="btn btn-sm btn-outline-primary-custom fw-600 rx-tab" data-filter="Rejected">Rejected (${rejected})</button>
+        </div>
+        <div class="search-bar" style="max-width:220px"><i class="bi bi-search"></i><input type="text" class="form-control" id="rxSearch" placeholder="Search prescriptions..."></div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-custom">
+          <thead><tr><th>Rx ID</th><th>Patient</th><th>Doctor / Hospital</th><th>Medicines</th><th>Date</th><th>Status</th><th>Priority</th><th>Actions</th></tr></thead>
+          <tbody id="rxTableBody"></tbody>
+        </table>
+      </div>
+      <div class="data-card-footer">
+        <span class="text-muted small">Showing <span id="rxCount">${prescriptions.length}</span> prescriptions</span>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+function renderRxTable(data) {
+  document.getElementById('rxCount').textContent = data.length;
+  document.getElementById('rxTableBody').innerHTML = data.map(p => {
+    const statusMap = { Pending:'badge-warning', Verified:'badge-success', Rejected:'badge-danger', Dispensed:'badge-info' };
+    const initials = p.customer.split(' ').map(w=>w[0]).join('');
+    const colors = ['#1a6bcc','#22c55e','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
+    const color = colors[p.customer.charCodeAt(0) % colors.length];
+    return `
+    <tr ${p.urgent && p.status === 'Pending' ? 'style="background:rgba(245,158,11,.04)"' : ''}>
+      <td class="fw-600 text-primary">${p.id}</td>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <div class="avatar avatar-sm" style="background:${color};font-size:.7rem">${initials}</div>
+          <div><div class="fw-600" style="font-size:.85rem">${p.customer}</div><small class="text-muted"><i class="bi bi-telephone me-1"></i>${p.phone}</small></div>
+        </div>
+      </td>
+      <td><div style="font-size:.85rem">${p.doctor}</div><small class="text-muted">${p.hospital}</small></td>
+      <td><span class="badge-custom badge-primary">${p.medicines.length} items</span></td>
+      <td class="text-muted small">${p.date}</td>
+      <td><span class="badge-custom ${statusMap[p.status]}">${p.status}</span></td>
+      <td>${p.urgent ? '<span class="badge-custom badge-danger"><i class="bi bi-lightning-fill me-1"></i>Urgent</span>' : '<span class="text-muted small">Normal</span>'}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="viewRx('${p.id}')" title="View Details"><i class="bi bi-eye"></i></button>
+          ${p.status === 'Pending' ? '<button class="btn btn-sm btn-primary-custom py-0 px-2" onclick="verifyRx(\''+p.id+'\')" title="Verify"><i class="bi bi-check2"></i></button><button class="btn btn-sm btn-danger-custom py-0 px-2" onclick="rejectRx(\''+p.id+'\')" title="Reject"><i class="bi bi-x"></i></button>' : ''}
+          ${p.status === 'Verified' ? '<button class="btn btn-sm btn-primary-custom py-0 px-2" onclick="dispenseRx(\''+p.id+'\')" title="Dispense"><i class="bi bi-capsule"></i></button>' : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function viewRx(id) {
+  const p = prescriptions.find(x => x.id === id);
+  document.getElementById('rxModalTitle').textContent = 'Prescription ' + p.id;
+  document.getElementById('rxModalBody').innerHTML = `
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card-custom p-3">
+          <h6 class="fw-700 mb-2"><i class="bi bi-person me-1 text-primary"></i>Patient</h6>
+          <div class="fw-600">${p.customer}</div>
+          <div class="text-muted small"><i class="bi bi-telephone me-1"></i>${p.phone}</div>
+          <div class="mt-2">${p.urgent ? '<span class="badge-custom badge-danger"><i class="bi bi-lightning-fill me-1"></i>Urgent</span>' : '<span class="badge-custom badge-info">Normal Priority</span>'}</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-custom p-3">
+          <h6 class="fw-700 mb-2"><i class="bi bi-hospital me-1 text-primary"></i>Prescriber</h6>
+          <div class="fw-600">${p.doctor}</div>
+          <div class="text-muted small">${p.hospital}</div>
+          <div class="text-muted small mt-1"><i class="bi bi-calendar me-1"></i>${p.date}</div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card-custom p-3">
+          <h6 class="fw-700 mb-2"><i class="bi bi-capsule me-1 text-primary"></i>Prescribed Medicines</h6>
+          <div class="d-flex flex-column gap-2">
+            ${p.medicines.map(m => `
+              <div class="d-flex align-items-center gap-2 p-2 rounded" style="background:rgba(26,107,204,.04)">
+                <span style="font-size:1.2rem">💊</span>
+                <div class="fw-600" style="font-size:.88rem">${m}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card-custom p-3">
+          <h6 class="fw-700 mb-2"><i class="bi bi-journal-text me-1 text-primary"></i>Notes</h6>
+          <p class="text-muted mb-0" style="font-size:.88rem">${p.notes}</p>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card-custom p-3" style="background:rgba(26,107,204,.04);border:1px dashed rgba(26,107,204,.3)">
+          <div class="text-center py-3">
+            <i class="bi bi-file-earmark-medical text-primary" style="font-size:2.5rem"></i>
+            <p class="mb-0 mt-2 text-muted small">Prescription image would be displayed here</p>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  const statusMap = { Pending:'badge-warning', Verified:'badge-success', Rejected:'badge-danger', Dispensed:'badge-info' };
+  document.getElementById('rxModalFooter').innerHTML = `
+    <span class="badge-custom ${statusMap[p.status]} me-auto">${p.status}</span>
+    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    ${p.status === 'Pending' ? '<button class="btn btn-danger-custom fw-600" onclick="rejectRx(\''+p.id+'\')"><i class="bi bi-x me-1"></i>Reject</button><button class="btn btn-primary-custom fw-600" onclick="verifyRx(\''+p.id+'\')"><i class="bi bi-check2 me-1"></i>Verify & Approve</button>' : ''}
+    ${p.status === 'Verified' ? '<button class="btn btn-primary-custom fw-600" onclick="dispenseRx(\''+p.id+'\')"><i class="bi bi-capsule me-1"></i>Dispense</button>' : ''}`;
+  new bootstrap.Modal(document.getElementById('rxModal')).show();
+}
+
+function verifyRx(id) {
+  showConfirm({ title:'Verify Prescription?', message:'This will approve the prescription for dispensing.', icon:'bi-check-circle-fill', iconColor:'#22c55e', confirmText:'Verify',
+    onConfirm:() => { const p = prescriptions.find(x=>x.id===id); p.status='Verified'; renderRxTable(prescriptions); showToast('Prescription verified!','success'); try{bootstrap.Modal.getInstance(document.getElementById('rxModal')).hide();}catch(e){} }
+  });
+}
+function rejectRx(id) {
+  showConfirm({ title:'Reject Prescription?', message:'Please confirm rejection of this prescription.', icon:'bi-x-circle-fill', iconColor:'#ef4444', confirmText:'Reject',
+    onConfirm:() => { const p = prescriptions.find(x=>x.id===id); p.status='Rejected'; renderRxTable(prescriptions); showToast('Prescription rejected','error'); try{bootstrap.Modal.getInstance(document.getElementById('rxModal')).hide();}catch(e){} }
+  });
+}
+function dispenseRx(id) {
+  showConfirm({ title:'Dispense Medicines?', message:'Confirm that medicines have been dispensed for this prescription.', icon:'bi-capsule', iconColor:'#1a6bcc', confirmText:'Dispense',
+    onConfirm:() => { const p = prescriptions.find(x=>x.id===id); p.status='Dispensed'; renderRxTable(prescriptions); showToast('Medicines dispensed!','success'); try{bootstrap.Modal.getInstance(document.getElementById('rxModal')).hide();}catch(e){} }
+  });
+}
+
+let activeRxFilter = '';
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar('phSidebar','phOverlay');
+  renderRxTable(prescriptions);
+
+  document.querySelectorAll('.rx-tab').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.rx-tab').forEach(b => { b.classList.remove('active','btn-primary-custom'); b.classList.add('btn-outline-primary-custom'); });
+      this.classList.add('active','btn-primary-custom'); this.classList.remove('btn-outline-primary-custom');
+      activeRxFilter = this.dataset.filter;
+      renderRxTable(prescriptions.filter(p => !activeRxFilter || p.status === activeRxFilter));
+    });
+  });
+
+  document.getElementById('rxSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    renderRxTable(prescriptions.filter(p => (!activeRxFilter || p.status === activeRxFilter) && (p.id.toLowerCase().includes(q) || p.customer.toLowerCase().includes(q) || p.doctor.toLowerCase().includes(q))));
+  });
+});
+</script>
+</body>
+</html>

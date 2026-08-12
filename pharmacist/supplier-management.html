@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Supplier Management — Pharmacist Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/pharmacist.css">
+</head>
+<body>
+<div class="ph-layout" id="layout"></div>
+
+<!-- Add/Edit Supplier Modal -->
+<div class="modal fade modal-custom" id="supModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700" id="supModalTitle">Add Supplier</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label fw-600 small">Company Name*</label><input type="text" class="form-control form-control-custom" id="supName" placeholder="e.g. Sun Pharma Distributors"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Contact Person*</label><input type="text" class="form-control form-control-custom" id="supContact" placeholder="Full name"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Phone*</label><input type="tel" class="form-control form-control-custom" id="supPhone" placeholder="9876543210"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Email</label><input type="email" class="form-control form-control-custom" id="supEmail" placeholder="supplier@company.com"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">City*</label><input type="text" class="form-control form-control-custom" id="supCity" placeholder="Mumbai"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">GST Number</label><input type="text" class="form-control form-control-custom" placeholder="27AABCU9603R1ZN"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Drug License No.</label><input type="text" class="form-control form-control-custom" placeholder="DL-MH-2024-001"></div>
+          <div class="col-md-6"><label class="form-label fw-600 small">Status</label><select class="form-control form-control-custom" id="supStatus"><option>Active</option><option>Inactive</option></select></div>
+          <div class="col-12"><label class="form-label fw-600 small">Full Address</label><textarea class="form-control form-control-custom" rows="2" placeholder="Complete supplier address"></textarea></div>
+          <div class="col-12"><label class="form-label fw-600 small">Notes</label><textarea class="form-control form-control-custom" rows="2" placeholder="Additional notes about this supplier"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary-custom fw-600" onclick="saveSup()"><i class="bi bi-check2 me-1"></i>Save Supplier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/pharmacist.js"></script>
+<script>
+document.getElementById('layout').innerHTML = PH_SIDEBAR('supplier') + `
+<div class="ph-main">
+  ${PH_HEADER('Supplier Management','Supplier Management')}
+  <div class="ph-content">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3"><div class="stat-card stat-blue"><div class="stat-icon mb-2">🏭</div><div class="stat-value">${DummyData.suppliers.length}</div><div class="stat-label">Total Suppliers</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card stat-green"><div class="stat-icon mb-2">✅</div><div class="stat-value">${DummyData.suppliers.filter(s=>s.status==='Active').length}</div><div class="stat-label">Active Suppliers</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card stat-orange"><div class="stat-icon mb-2">⏸️</div><div class="stat-value">${DummyData.suppliers.filter(s=>s.status==='Inactive').length}</div><div class="stat-label">Inactive</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card stat-cyan"><div class="stat-icon mb-2">🏙️</div><div class="stat-value">${[...new Set(DummyData.suppliers.map(s=>s.city))].length}</div><div class="stat-label">Cities Covered</div></div></div>
+    </div>
+
+    <!-- Supplier Table -->
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-title">All Suppliers</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <div class="search-bar" style="max-width:220px"><i class="bi bi-search"></i><input type="text" class="form-control" id="supSearch" placeholder="Search suppliers..."></div>
+          <select class="form-select form-select-sm" style="width:120px;font-family:var(--font-main)" id="supStatusFilter">
+            <option value="">All Status</option>
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+          <button class="btn btn-primary-custom fw-600" data-bs-toggle="modal" data-bs-target="#supModal"><i class="bi bi-plus me-1"></i>Add Supplier</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-custom" id="supTable">
+          <thead><tr><th>ID</th><th>Supplier</th><th>Contact Person</th><th>Phone</th><th>City</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="supTableBody"></tbody>
+        </table>
+      </div>
+      <div class="data-card-footer">
+        <span class="text-muted small">Showing <span id="supCount">${DummyData.suppliers.length}</span> suppliers</span>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+function renderSupTable(sups) {
+  document.getElementById('supCount').textContent = sups.length;
+  document.getElementById('supTableBody').innerHTML = sups.map(s => `
+    <tr>
+      <td class="text-muted small">${s.id}</td>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#1a6bcc,#00b4d8);font-size:.65rem">${s.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+          <div class="fw-600" style="font-size:.88rem">${s.name}</div>
+        </div>
+      </td>
+      <td style="font-size:.88rem">${s.contact}</td>
+      <td style="font-size:.88rem"><i class="bi bi-telephone me-1 text-muted small"></i>${s.phone}</td>
+      <td><span class="badge-custom badge-info">${s.city}</span></td>
+      <td>${s.status==='Active'?'<span class="badge-custom badge-success">Active</span>':'<span class="badge-custom badge-danger">Inactive</span>'}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="editSup('${s.id}')" title="Edit"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-outline-primary-custom py-0 px-2" onclick="showToast('Supplier details viewed','info')" title="View"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm btn-danger-custom py-0 px-2" onclick="deleteSup('${s.id}')" title="Delete"><i class="bi bi-trash"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function editSup(id) {
+  const s = DummyData.suppliers.find(x => x.id === id);
+  document.getElementById('supModalTitle').textContent = 'Edit Supplier';
+  document.getElementById('supName').value = s.name;
+  document.getElementById('supContact').value = s.contact;
+  document.getElementById('supPhone').value = s.phone;
+  document.getElementById('supCity').value = s.city;
+  new bootstrap.Modal(document.getElementById('supModal')).show();
+}
+function deleteSup(id) { showConfirm({ title:'Delete Supplier?', message:'This will permanently remove this supplier record.', onConfirm: () => showToast('Supplier deleted','error') }); }
+function saveSup() { showLoader(); setTimeout(() => { hideLoader(); bootstrap.Modal.getInstance(document.getElementById('supModal')).hide(); showToast('Supplier saved successfully!','success'); }, 1000); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar('phSidebar','phOverlay');
+  renderSupTable(DummyData.suppliers);
+  document.getElementById('supSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    const status = document.getElementById('supStatusFilter').value;
+    renderSupTable(DummyData.suppliers.filter(s => (s.name.toLowerCase().includes(q) || s.contact.toLowerCase().includes(q) || s.city.toLowerCase().includes(q)) && (!status || s.status === status)));
+  });
+  document.getElementById('supStatusFilter').addEventListener('change', function() {
+    const q = document.getElementById('supSearch').value.toLowerCase();
+    renderSupTable(DummyData.suppliers.filter(s => (s.name.toLowerCase().includes(q) || s.contact.toLowerCase().includes(q)) && (!this.value || s.status === this.value)));
+  });
+});
+</script>
+</body>
+</html>

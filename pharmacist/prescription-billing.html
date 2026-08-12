@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rx & Billing — Pharmacist Portal | MediCare</title>
+  <meta name="description" content="Combined prescription verification and billing workflow for pharmacists.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/pharmacist.css">
+</head>
+<body>
+<div class="ph-layout" id="layout"></div>
+
+<!-- ══ REJECT REASON MODAL ════════════════════════════════════ -->
+<div class="modal fade modal-custom" id="rejectModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700"><i class="bi bi-x-circle-fill text-danger me-2"></i>Reject Prescription</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <label class="form-label fw-600 small mb-1">Reason for Rejection</label>
+        <select class="form-control form-control-custom mb-2" id="rejectReason">
+          <option>Prescription expired</option>
+          <option>Illegible handwriting</option>
+          <option>Incorrect dosage</option>
+          <option>Controlled substance – needs verification</option>
+          <option>Other</option>
+        </select>
+        <textarea class="form-control form-control-custom" rows="3" placeholder="Additional notes (optional)..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger-custom fw-600" onclick="rejectRx()"><i class="bi bi-x-circle me-1"></i>Reject</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRINT INVOICE MODAL ════════════════════════════════════ -->
+<div class="modal fade modal-custom" id="invoiceModal" tabindex="-1" style="--bs-modal-width:860px">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-700"><i class="bi bi-receipt me-2"></i>Invoice Preview</h5>
+        <div class="ms-auto d-flex gap-2 me-3">
+          <button class="btn btn-sm btn-outline-primary-custom" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+          <button class="btn btn-sm btn-secondary-custom" onclick="showToast('Invoice saved as PDF','success')"><i class="bi bi-download me-1"></i>Save PDF</button>
+        </div>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4" id="invoiceContent"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/pharmacist.js"></script>
+<script>
+/* ── Dummy prescription queue ─────────────────────────────── */
+const rxQueue = [
+  { id:'RX-0087', date:'2024-12-20', time:'10:32 AM', customer:'Priya Sharma', phone:'+91 98765 43210', age:32, doctor:'Dr. Ramesh Gupta', hospital:'City General Hospital', medicines:['Amoxicillin 500mg (×2)','Paracetamol 500mg (×3)','Cetirizine 10mg (×1)'], status:'Pending', notes:'Patient is allergic to Penicillin — use alternative antibiotic if needed.' },
+  { id:'RX-0088', date:'2024-12-20', time:'11:15 AM', customer:'Rahul Mehta', phone:'+91 87654 32109', age:45, doctor:'Dr. Sunita Rao', hospital:'Apollo Clinic', medicines:['Atorvastatin 20mg (×1)','Metformin 500mg (×2)'], status:'Pending', notes:'Regular monthly prescription — patient has been on this for 6 months.' },
+  { id:'RX-0089', date:'2024-12-20', time:'01:48 PM', customer:'Anita Singh', phone:'+91 76543 21098', age:28, doctor:'Dr. Vikram Patel', hospital:'LifeCare Hospital', medicines:['Doxycycline 100mg (×1)','Ibuprofen 400mg (×2)'], status:'Approved', notes:'' },
+];
+
+let currentRxId = null;
+let billItems = [];
+
+/* ── Render Page ──────────────────────────────────────────── */
+function renderPage() {
+  const pendingCount = rxQueue.filter(r => r.status === 'Pending').length;
+  document.getElementById('layout').innerHTML = PH_SIDEBAR('rxbilling') + `
+  <div class="ph-main">
+    ${PH_HEADER('Prescription & Billing','Rx & Billing')}
+    <div class="ph-content">
+
+      <!-- Workflow Steps -->
+      <div class="rx-workflow-steps mb-4">
+        <div class="rx-workflow-step done" id="ws1">
+          <div class="rx-step-circle"><i class="bi bi-check-lg"></i></div>
+          <div class="rx-step-label">Queue</div>
+        </div>
+        <div class="rx-workflow-step active" id="ws2">
+          <div class="rx-step-circle"><i class="bi bi-file-medical"></i></div>
+          <div class="rx-step-label">Verify Rx</div>
+        </div>
+        <div class="rx-workflow-step" id="ws3">
+          <div class="rx-step-circle"><i class="bi bi-capsule"></i></div>
+          <div class="rx-step-label">Select Medicines</div>
+        </div>
+        <div class="rx-workflow-step" id="ws4">
+          <div class="rx-step-circle"><i class="bi bi-receipt"></i></div>
+          <div class="rx-step-label">Generate Bill</div>
+        </div>
+        <div class="rx-workflow-step" id="ws5">
+          <div class="rx-step-circle"><i class="bi bi-printer"></i></div>
+          <div class="rx-step-label">Print Invoice</div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+
+        <!-- LEFT: Rx Queue + Image Viewer -->
+        <div class="col-lg-4">
+
+          <!-- Queue Card -->
+          <div class="rx-card mb-3">
+            <div class="rx-card-header">
+              <span class="rx-card-title"><i class="bi bi-list-check me-2 text-primary"></i>Prescription Queue</span>
+              <span class="badge-custom badge-primary">${pendingCount} Pending</span>
+            </div>
+            <div class="rx-card-body p-0">
+              ${rxQueue.map(rx => `
+                <div class="d-flex align-items-start gap-2 p-3 border-bottom cursor-pointer rx-queue-item ${rx.id === currentRxId ? 'bg-blue-50' : ''}" onclick="selectRx('${rx.id}')" style="${rx.id === currentRxId ? 'background:rgba(37,99,235,.06)' : ''}">
+                  <div class="avatar avatar-sm" style="background:${rx.status==='Approved'?'rgba(34,197,94,.15)':'rgba(245,158,11,.15)'};color:${rx.status==='Approved'?'var(--success)':'var(--warning)'}"><i class="bi bi-file-medical-fill"></i></div>
+                  <div class="flex-1 overflow-hidden">
+                    <div class="fw-700" style="font-size:.85rem">${rx.id}</div>
+                    <div style="font-size:.78rem;color:var(--dark-3)">${rx.customer}</div>
+                    <div style="font-size:.72rem;color:var(--gray-400)">${rx.time}</div>
+                  </div>
+                  <span class="badge-custom ${rx.status==='Approved'?'badge-success':'badge-warning'}" style="font-size:.65rem">${rx.status}</span>
+                </div>`).join('')}
+            </div>
+          </div>
+
+          <!-- Prescription Image Viewer -->
+          <div class="rx-card">
+            <div class="rx-card-header">
+              <span class="rx-card-title"><i class="bi bi-image me-2 text-primary"></i>Prescription Image</span>
+            </div>
+            <div class="rx-card-body">
+              <div class="rx-image-viewer" id="rxImageViewer">
+                <div class="rx-placeholder">
+                  <i class="bi bi-file-medical"></i>
+                  <div class="fw-600" style="font-size:.88rem">Select a prescription from the queue</div>
+                  <div style="font-size:.78rem;color:var(--gray-400);margin-top:.3rem">to view the uploaded image</div>
+                </div>
+              </div>
+              <div class="d-flex gap-2 mt-2 justify-content-center">
+                <button class="btn btn-sm btn-outline-primary-custom" onclick="showToast('Image zoomed','info')"><i class="bi bi-zoom-in"></i></button>
+                <button class="btn btn-sm btn-outline-primary-custom" onclick="showToast('Image rotated','info')"><i class="bi bi-arrow-clockwise"></i></button>
+                <button class="btn btn-sm btn-outline-primary-custom" onclick="showToast('Image downloaded','info')"><i class="bi bi-download"></i></button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CENTER: Rx Details + Actions + Medicine Selection -->
+        <div class="col-lg-5">
+
+          <!-- Customer & Prescription Details -->
+          <div class="rx-card mb-3" id="rxDetailCard">
+            <div class="rx-card-header">
+              <span class="rx-card-title"><i class="bi bi-person-fill me-2 text-primary"></i>Patient Details</span>
+              <span id="rxStatusBadge" class="badge-custom badge-warning">Select Rx</span>
+            </div>
+            <div class="rx-card-body" id="rxDetailBody">
+              <div class="empty-state py-3"><i class="bi bi-file-earmark-medical" style="font-size:2rem"></i><p style="font-size:.85rem">Select a prescription to view patient details</p></div>
+            </div>
+          </div>
+
+          <!-- Approve / Reject Actions -->
+          <div class="rx-card mb-3">
+            <div class="rx-card-header"><span class="rx-card-title"><i class="bi bi-shield-check me-2 text-success"></i>Verification Actions</span></div>
+            <div class="rx-card-body">
+              <div class="d-flex gap-2 flex-wrap">
+                <button class="rx-action-approve flex-1" id="approveBtn" onclick="approveRx()" disabled>
+                  <i class="bi bi-check-circle-fill"></i>Approve Rx
+                </button>
+                <button class="rx-action-reject flex-1" id="rejectBtn" data-bs-toggle="modal" data-bs-target="#rejectModal" disabled>
+                  <i class="bi bi-x-circle-fill"></i>Reject
+                </button>
+              </div>
+              <div class="mt-2 p-2 rounded" style="background:var(--gray-100);font-size:.78rem;color:var(--dark-3)">
+                <i class="bi bi-info-circle me-1 text-primary"></i>
+                Verify the prescription matches the patient's details before approving.
+              </div>
+            </div>
+          </div>
+
+          <!-- Medicine Selection -->
+          <div class="rx-card">
+            <div class="rx-card-header">
+              <span class="rx-card-title"><i class="bi bi-capsule me-2 text-primary"></i>Select Medicines</span>
+              <div class="search-bar" style="max-width:160px">
+                <i class="bi bi-search"></i>
+                <input type="text" class="form-control" id="medSearchInp" placeholder="Search..." oninput="filterBillMeds(this.value)">
+              </div>
+            </div>
+            <div class="rx-card-body" id="medSelectionBody" style="max-height:340px;overflow-y:auto">
+              ${DummyData.medicines.map(m => `
+                <div class="bill-medicine-row" data-name="${m.name.toLowerCase()} ${m.brand.toLowerCase()}">
+                  <div class="flex-1">
+                    <div class="bill-medicine-name">${m.name}</div>
+                    <div style="font-size:.74rem;color:var(--secondary);font-weight:600">${m.brand}</div>
+                  </div>
+                  <div class="bill-medicine-price">₹${m.price}</div>
+                  <div class="qty-control" style="transform:scale(.88)">
+                    <button class="qty-btn" onclick="changeItemQty(${m.id},-1,${m.price},'${m.name}')">-</button>
+                    <input class="qty-input" id="bqty_${m.id}" value="0" style="width:36px">
+                    <button class="qty-btn" onclick="changeItemQty(${m.id},1,${m.price},'${m.name}')">+</button>
+                  </div>
+                </div>`).join('')}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: Bill Summary -->
+        <div class="col-lg-3">
+          <div class="rx-card" style="position:sticky;top:80px">
+            <div class="rx-card-header"><span class="rx-card-title"><i class="bi bi-receipt me-2 text-primary"></i>Bill Summary</span></div>
+            <div class="rx-card-body">
+              <div id="billItemsList" style="max-height:280px;overflow-y:auto;margin-bottom:1rem">
+                <div class="empty-state py-2" style="padding:1.5rem"><i class="bi bi-cart-x" style="font-size:2rem"></i><p style="font-size:.82rem">Add medicines to the bill</p></div>
+              </div>
+
+              <div class="bill-summary-card">
+                <div class="bill-summary-row"><span>Subtotal</span><span id="billSubtotal" class="fw-700">₹0.00</span></div>
+                <div class="bill-summary-row"><span>GST (18%)</span><span id="billGst" class="fw-700">₹0.00</span></div>
+                <div class="bill-summary-row"><span>Discount</span><span class="text-success fw-700">-₹0.00</span></div>
+                <div class="bill-summary-total"><span>Total Payable</span><span id="billTotal">₹0.00</span></div>
+              </div>
+
+              <div class="mt-3 d-flex flex-column gap-2">
+                <button class="btn btn-primary-custom w-100 fw-700" onclick="generateInvoice()">
+                  <i class="bi bi-receipt me-2"></i>Generate Invoice
+                </button>
+                <button class="btn btn-outline-primary-custom w-100 fw-600" onclick="clearBill()">
+                  <i class="bi bi-trash me-1"></i>Clear Bill
+                </button>
+              </div>
+
+              <div class="mt-3">
+                <div style="font-size:.75rem;font-weight:700;color:var(--dark-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem">Patient Info</div>
+                <div id="billPatientInfo" style="font-size:.8rem;color:var(--dark-3)">
+                  <span style="color:var(--gray-400)">Select a prescription first</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>`;
+
+  initSidebar('phSidebar', 'phOverlay');
+}
+
+/* ── Select Prescription ──────────────────────────────────── */
+function selectRx(id) {
+  currentRxId = id;
+  const rx = rxQueue.find(r => r.id === id);
+
+  // Update image viewer
+  document.getElementById('rxImageViewer').innerHTML = `
+    <div style="width:100%;height:100%;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem">
+      <i class="bi bi-file-medical-fill" style="font-size:4rem;color:rgba(37,99,235,.3)"></i>
+      <div style="text-align:center">
+        <div style="font-weight:700;font-size:.9rem;color:var(--primary)">${rx.id}</div>
+        <div style="font-size:.78rem;color:var(--dark-3)">Prescription Image</div>
+        <div style="font-size:.72rem;color:var(--gray-400);margin-top:.3rem">Dr. ${rx.doctor}</div>
+      </div>
+    </div>
+    <div class="rx-zoom-hint"><i class="bi bi-zoom-in me-1"></i>Click to zoom</div>`;
+
+  // Update patient details
+  const statusBadge = rx.status === 'Approved'
+    ? '<span class="badge-custom badge-success"><i class="bi bi-check-circle-fill me-1"></i>Approved</span>'
+    : '<span class="badge-custom badge-warning"><i class="bi bi-clock-fill me-1"></i>Pending</span>';
+  document.getElementById('rxStatusBadge').outerHTML = `<span id="rxStatusBadge" class="badge-custom ${rx.status==='Approved'?'badge-success':'badge-warning'}"><i class="bi bi-${rx.status==='Approved'?'check-circle-fill':'clock-fill'} me-1"></i>${rx.status}</span>`;
+
+  document.getElementById('rxDetailBody').innerHTML = `
+    <div class="customer-info-row"><span class="customer-info-label"><i class="bi bi-person me-1"></i>Patient</span><span class="customer-info-value">${rx.customer}</span></div>
+    <div class="customer-info-row"><span class="customer-info-label"><i class="bi bi-telephone me-1"></i>Phone</span><span class="customer-info-value">${rx.phone}</span></div>
+    <div class="customer-info-row"><span class="customer-info-label"><i class="bi bi-calendar me-1"></i>Age</span><span class="customer-info-value">${rx.age} years</span></div>
+    <div class="customer-info-row"><span class="customer-info-label"><i class="bi bi-person-badge me-1"></i>Doctor</span><span class="customer-info-value">${rx.doctor}</span></div>
+    <div class="customer-info-row"><span class="customer-info-label"><i class="bi bi-hospital me-1"></i>Hospital</span><span class="customer-info-value">${rx.hospital}</span></div>
+    <div class="customer-info-row"><span class="customer-info-label"><i class="bi bi-calendar3 me-1"></i>Date</span><span class="customer-info-value">${rx.date} ${rx.time}</span></div>
+    <div class="mt-2">
+      <div style="font-size:.75rem;font-weight:700;color:var(--dark-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem">Prescribed Medicines</div>
+      ${rx.medicines.map(m => `<div class="d-flex align-items-center gap-2 mb-1" style="font-size:.82rem"><i class="bi bi-capsule text-primary"></i>${m}</div>`).join('')}
+    </div>
+    ${rx.notes ? `<div class="mt-2 p-2 rounded" style="background:rgba(245,158,11,.08);border-left:3px solid var(--warning);font-size:.8rem;color:#92400E"><i class="bi bi-exclamation-triangle-fill me-1"></i>${rx.notes}</div>` : ''}`;
+
+  // Enable buttons
+  document.getElementById('approveBtn').disabled = rx.status === 'Approved';
+  document.getElementById('rejectBtn').disabled = false;
+
+  // Update bill patient info
+  document.getElementById('billPatientInfo').innerHTML = `
+    <div class="fw-700" style="color:var(--dark)">${rx.customer}</div>
+    <div><i class="bi bi-hash me-1 text-primary"></i>${rx.id}</div>
+    <div style="color:var(--gray-400)">${rx.date}</div>`;
+
+  // Re-render to highlight selected
+  document.querySelectorAll('.rx-queue-item').forEach(el => {
+    el.style.background = '';
+  });
+  renderPage();
+}
+
+/* ── Approve / Reject ─────────────────────────────────────── */
+function approveRx() {
+  if (!currentRxId) return;
+  const rx = rxQueue.find(r => r.id === currentRxId);
+  rx.status = 'Approved';
+  showToast(`Prescription ${currentRxId} approved! ✅`, 'success');
+  // Advance workflow
+  document.querySelectorAll('.rx-workflow-step')[2].classList.add('active');
+  document.querySelectorAll('.rx-workflow-step')[1].classList.remove('active');
+  document.querySelectorAll('.rx-workflow-step')[1].classList.add('done');
+  renderPage();
+}
+
+function rejectRx() {
+  if (!currentRxId) return;
+  bootstrap.Modal.getInstance(document.getElementById('rejectModal'))?.hide();
+  showToast(`Prescription ${currentRxId} rejected`, 'error');
+  currentRxId = null;
+}
+
+/* ── Bill Item Management ─────────────────────────────────── */
+function changeItemQty(id, delta, price, name) {
+  const inp = document.getElementById('bqty_' + id);
+  if (!inp) return;
+  const newQty = Math.max(0, (parseInt(inp.value) || 0) + delta);
+  inp.value = newQty;
+
+  const existingIdx = billItems.findIndex(i => i.id === id);
+  if (newQty === 0) {
+    if (existingIdx > -1) billItems.splice(existingIdx, 1);
+  } else {
+    if (existingIdx > -1) { billItems[existingIdx].qty = newQty; }
+    else { billItems.push({ id, name, price, qty: newQty }); }
+  }
+  updateBillSummary();
+}
+
+function updateBillSummary() {
+  const listEl = document.getElementById('billItemsList');
+  if (!billItems.length) {
+    listEl.innerHTML = `<div class="empty-state py-2" style="padding:1.5rem"><i class="bi bi-cart-x" style="font-size:2rem"></i><p style="font-size:.82rem">Add medicines to the bill</p></div>`;
+    document.getElementById('billSubtotal').textContent = '₹0.00';
+    document.getElementById('billGst').textContent = '₹0.00';
+    document.getElementById('billTotal').textContent = '₹0.00';
+    return;
+  }
+
+  const subtotal = billItems.reduce((s, i) => s + i.price * i.qty, 0);
+  const gst = subtotal * 0.18;
+  const total = subtotal + gst;
+
+  listEl.innerHTML = billItems.map(i => `
+    <div class="d-flex align-items-center gap-1 mb-1 p-1" style="background:var(--gray-100);border-radius:6px">
+      <span style="font-size:.78rem;flex:1;font-weight:600;color:var(--dark)">${i.name.split(' ')[0]}</span>
+      <span style="font-size:.72rem;color:var(--gray-400)">×${i.qty}</span>
+      <span style="font-size:.8rem;font-weight:700;color:var(--primary)">₹${(i.price * i.qty).toFixed(2)}</span>
+    </div>`).join('');
+
+  document.getElementById('billSubtotal').textContent = '₹' + subtotal.toFixed(2);
+  document.getElementById('billGst').textContent = '₹' + gst.toFixed(2);
+  document.getElementById('billTotal').textContent = '₹' + total.toFixed(2);
+}
+
+function clearBill() {
+  billItems = [];
+  document.querySelectorAll('[id^="bqty_"]').forEach(inp => inp.value = 0);
+  updateBillSummary();
+  showToast('Bill cleared', 'info');
+}
+
+function filterBillMeds(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('#medSelectionBody .bill-medicine-row').forEach(row => {
+    const name = row.getAttribute('data-name') || '';
+    row.style.display = name.includes(q) ? '' : 'none';
+  });
+}
+
+/* ── Generate Invoice ─────────────────────────────────────── */
+function generateInvoice() {
+  if (!billItems.length) { showToast('Add medicines to generate invoice', 'warning'); return; }
+
+  const rx = currentRxId ? rxQueue.find(r => r.id === currentRxId) : null;
+  const subtotal = billItems.reduce((s, i) => s + i.price * i.qty, 0);
+  const gst = subtotal * 0.18;
+  const total = subtotal + gst;
+  const invoiceNo = 'INV-' + Math.floor(Math.random() * 9000 + 1000);
+  const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  document.getElementById('invoiceContent').innerHTML = `
+    <div class="invoice-wrap no-print-shadow">
+      <div class="invoice-header">
+        <div class="invoice-brand">
+          <div class="invoice-brand-icon"><i class="bi bi-capsule-pill"></i></div>
+          <div>
+            <div style="font-size:1.2rem;font-weight:800;color:var(--primary)">MediCare Pharmacy</div>
+            <div style="font-size:.78rem;color:var(--gray-400)">123 Health Street, Mumbai | GSTIN: 27AABCU9603R1ZN</div>
+            <div style="font-size:.78rem;color:var(--gray-400)">Drug Lic: MH-MUM-2024-0847 | Ph: +91 98765 43210</div>
+          </div>
+        </div>
+        <div class="text-end">
+          <div class="invoice-title">${invoiceNo}</div>
+          <div class="invoice-number">Date: ${today}</div>
+          ${rx ? `<div class="invoice-number">Prescription: ${rx.id}</div>` : ''}
+          <div class="mt-2"><span class="invoice-stamp">PAID</span></div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-6">
+          <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--dark-3);margin-bottom:.4rem">Bill To</div>
+          <div class="fw-700">${rx ? rx.customer : 'Walk-in Customer'}</div>
+          ${rx ? `<div style="font-size:.82rem;color:var(--dark-3)">${rx.phone}</div><div style="font-size:.82rem;color:var(--dark-3)">Doctor: ${rx.doctor}</div>` : ''}
+        </div>
+        <div class="col-6 text-end">
+          <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--dark-3);margin-bottom:.4rem">Pharmacist</div>
+          <div class="fw-700">Dr. Amit Kumar</div>
+          <div style="font-size:.82rem;color:var(--dark-3)">Senior Pharmacist</div>
+          <div style="font-size:.82rem;color:var(--gray-400)">Lic: PH-MH-2024-0312</div>
+        </div>
+      </div>
+
+      <table class="invoice-table mb-3">
+        <thead><tr><th>#</th><th>Medicine</th><th>Unit Price</th><th>Qty</th><th>Total</th></tr></thead>
+        <tbody>
+          ${billItems.map((item, idx) => `
+            <tr>
+              <td style="color:var(--gray-400)">${String(idx+1).padStart(2,'0')}</td>
+              <td class="fw-600">${item.name}</td>
+              <td>₹${item.price.toFixed(2)}</td>
+              <td>${item.qty}</td>
+              <td class="fw-700 text-primary">₹${(item.price * item.qty).toFixed(2)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+
+      <div class="row justify-content-end">
+        <div class="col-md-5">
+          <div class="bill-summary-card">
+            <div class="bill-summary-row"><span>Subtotal</span><span class="fw-700">₹${subtotal.toFixed(2)}</span></div>
+            <div class="bill-summary-row"><span>GST (18%)</span><span class="fw-700">₹${gst.toFixed(2)}</span></div>
+            <div class="bill-summary-row"><span>Discount</span><span class="text-success fw-700">-₹0.00</span></div>
+            <div class="bill-summary-total"><span>Grand Total</span><span>₹${total.toFixed(2)}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="invoice-footer-note mt-3">
+        <i class="bi bi-shield-check me-2"></i>
+        All medicines are sourced from certified distributors. This invoice is computer generated and does not require a signature. For queries: support@medicare-pharma.com
+      </div>
+    </div>`;
+
+  // Advance step
+  document.querySelectorAll('.rx-workflow-step').forEach((s, i) => {
+    s.classList.remove('active', 'done');
+    if (i < 4) s.classList.add('done');
+    if (i === 4) s.classList.add('active');
+  });
+
+  new bootstrap.Modal(document.getElementById('invoiceModal')).show();
+}
+
+/* ── Init ─────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  renderPage();
+});
+</script>
+</body>
+</html>

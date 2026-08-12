@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Upload Prescription — MediCare Pharmacy</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/customer.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg customer-navbar">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand navbar-brand-custom" href="../index.html">
+      <div class="brand-icon"><i class="bi bi-capsule-pill"></i></div>
+      <span>Medi<b>Care</b></span>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navRx">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navRx">
+      <ul class="navbar-nav mx-auto gap-1">
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="../index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="medicines.html"><i class="bi bi-capsule me-1"></i>Medicines</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="../index.html#categories"><i class="bi bi-grid-3x3-gap me-1"></i>Categories</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="orders.html"><i class="bi bi-bag-check me-1"></i>Orders</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="feedback.html"><i class="bi bi-star me-1"></i>Feedback</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <div class="search-bar d-none d-lg-block" style="max-width:220px">
+          <i class="bi bi-search"></i>
+          <input type="text" class="form-control" placeholder="Search medicines...">
+        </div>
+        <a href="cart.html" class="cart-btn"><i class="bi bi-cart3"></i><span class="cart-count" id="navCartCount">0</span></a>
+        <div id="navAccountArea"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="page-hero mb-4">
+  <div class="container" style="position:relative;z-index:1">
+    <div class="hero-kicker mb-2"><i class="bi bi-file-medical-fill me-2"></i>Prescription Service</div>
+    <h1 style="font-size:2rem;font-weight:800;color:#fff;margin-bottom:.5rem">Upload Your Prescription</h1>
+    <p style="color:rgba(255,255,255,.75);font-size:.95rem">Our licensed pharmacists will verify your prescription within 30 minutes and prepare your order.</p>
+  </div>
+</div>
+<div class="container pb-5">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <!-- Upload Form -->
+      <div class="card-custom p-4 mb-4">
+        <h6 class="fw-700 mb-3"><i class="bi bi-cloud-upload-fill text-primary me-2"></i>Upload Prescription</h6>
+        <div class="dropzone" id="mainDropzone" onclick="document.getElementById('rxUpload').click()">
+          <i class="bi bi-file-medical-fill" style="color:var(--primary)"></i>
+          <div class="dropzone-title">Drop your prescription here</div>
+          <p class="dropzone-sub">Supports JPG, PNG, PDF &bull; Max size 5MB</p>
+          <button class="btn btn-primary-custom btn-sm px-4 mt-2" onclick="event.stopPropagation()">Choose File</button>
+          <input type="file" id="rxUpload" accept="image/*,.pdf" style="display:none">
+        </div>
+        <div id="rxPreviewBox"></div>
+      </div>
+      <!-- Notes -->
+      <div class="card-custom p-4 mb-4">
+        <h6 class="fw-700 mb-3"><i class="bi bi-chat-text-fill text-primary me-2"></i>Notes for Pharmacist</h6>
+        <textarea class="form-control form-control-custom" rows="3" placeholder="Any specific notes? (e.g. generic substitute preferred, allergies, dosage instructions)"></textarea>
+      </div>
+      <button class="btn btn-primary-custom w-100 py-2 fw-700" onclick="submitPrescription()">
+        <i class="bi bi-send-fill me-2"></i>Submit for Verification
+      </button>
+      <div class="trust-seals mt-3">
+        <div class="trust-seal"><i class="bi bi-shield-check-fill"></i>100% Confidential</div>
+        <div class="trust-seal"><i class="bi bi-clock-fill" style="color:var(--primary)"></i>Verified in 30 min</div>
+        <div class="trust-seal"><i class="bi bi-patch-check-fill" style="color:#8B5CF6"></i>Licensed Pharmacists</div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <!-- Guidelines -->
+      <div class="rx-tip-card mb-4">
+        <div class="fw-700 mb-3" style="font-size:.95rem"><i class="bi bi-info-circle-fill text-primary me-2"></i>Prescription Guidelines</div>
+        <div class="rx-tip-item"><i class="bi bi-check-circle-fill text-success"></i><span>Prescription must be from a registered MCI doctor</span></div>
+        <div class="rx-tip-item"><i class="bi bi-check-circle-fill text-success"></i><span>Date of prescription must be within last 6 months</span></div>
+        <div class="rx-tip-item"><i class="bi bi-check-circle-fill text-success"></i><span>Patient name &amp; doctor's signature must be clearly visible</span></div>
+        <div class="rx-tip-item"><i class="bi bi-check-circle-fill text-success"></i><span>Image must be clear, not blurry or cropped</span></div>
+        <div class="rx-tip-item" style="border-bottom:none"><i class="bi bi-x-circle-fill text-danger"></i><span>Handwritten prescriptions without doctor stamp not accepted</span></div>
+      </div>
+      <!-- Previous Prescriptions -->
+      <div class="card-custom p-4">
+        <h6 class="fw-700 mb-3"><i class="bi bi-clock-history text-primary me-2"></i>Previous Prescriptions</h6>
+        <div class="d-flex flex-column gap-2">
+          <div class="prescription-preview">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(16,185,129,.1));border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="bi bi-file-medical-fill" style="font-size:1.2rem;color:var(--success)"></i>
+            </div>
+            <div class="flex-1">
+              <div class="fw-600" style="font-size:.88rem">Prescription #RX-001</div>
+              <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>Uploaded: 15 Nov 2024</small>
+            </div>
+            <span class="badge-custom badge-success"><i class="bi bi-check-circle-fill me-1"></i>Verified</span>
+          </div>
+          <div class="prescription-preview">
+            <div style="width:48px;height:48px;background:rgba(245,158,11,.08);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="bi bi-file-medical-fill" style="font-size:1.2rem;color:var(--warning)"></i>
+            </div>
+            <div class="flex-1">
+              <div class="fw-600" style="font-size:.88rem">Prescription #RX-002</div>
+              <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>Uploaded: 02 Dec 2024</small>
+            </div>
+            <span class="badge-custom badge-warning"><i class="bi bi-clock-fill me-1"></i>Pending</span>
+          </div>
+          <div class="prescription-preview">
+            <div style="width:48px;height:48px;background:rgba(239,68,68,.08);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="bi bi-file-medical-fill" style="font-size:1.2rem;color:var(--danger)"></i>
+            </div>
+            <div class="flex-1">
+              <div class="fw-600" style="font-size:.88rem">Prescription #RX-003</div>
+              <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>Uploaded: 10 Dec 2024</small>
+            </div>
+            <span class="badge-custom badge-danger"><i class="bi bi-x-circle-fill me-1"></i>Rejected</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade modal-custom" id="successModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center p-5">
+        <div style="font-size:3.5rem;margin-bottom:1rem">✅</div>
+        <h5 class="fw-800 text-success">Prescription Submitted!</h5>
+        <p class="text-muted">Your prescription has been submitted for verification. Our pharmacist will review it within 30 minutes.</p>
+        <div class="alert-custom alert-info-custom mt-3"><i class="bi bi-info-circle-fill"></i>Ref: <strong>RX-20241220</strong></div>
+        <a href="medicines.html" class="btn btn-primary-custom mt-3 fw-600">Browse Medicines</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+<script>
+initDropzone('mainDropzone', 'rxUpload', 'rxPreviewBox');
+function submitPrescription() {
+  showLoader();
+  setTimeout(() => { hideLoader(); new bootstrap.Modal(document.getElementById('successModal')).show(); }, 1800);
+}
+</script>
+</body>
+</html>
