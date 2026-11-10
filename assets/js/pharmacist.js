@@ -1,76 +1,9 @@
-/* Shared pharmacist sidebar snippet for all sub-pages — injected via JS */
-const PH_SIDEBAR = (activePage) => `
-<aside class="ph-sidebar" id="phSidebar">
-  <div class="sidebar-brand">
-    <div class="sidebar-brand-icon"><i class="bi bi-capsule-pill"></i></div>
-    <div class="sidebar-brand-text">MediCare<span>Pharmacist Portal</span></div>
-  </div>
-  <div class="sidebar-user">
-    <div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">AK</div>
-    <div class="sidebar-user-info">
-      <div class="sidebar-user-name">Dr. Amit Kumar</div>
-      <div class="sidebar-user-role">Senior Pharmacist</div>
-    </div>
-  </div>
-  <nav class="sidebar-nav">
-    <div class="sidebar-label">Main</div>
-    <div class="sidebar-nav-item">
-      <a class="sidebar-nav-link ${activePage==='dashboard'?'active':''}" href="Dashboard.aspx">
-        <i class="bi bi-speedometer2"></i>Dashboard
-      </a>
-    </div>
-    <div class="sidebar-nav-item">
-      <a class="sidebar-nav-link ${activePage==='medicine'?'active':''}" href="MedicineManagement.aspx">
-        <i class="bi bi-capsule"></i>Medicine Management
-      </a>
-    </div>
+/* ============================================================
+   PHARMACIST JS — Header templates for pharmacist portal
+   (Sidebar HTML is directly embedded into each individual page)
+   ============================================================ */
+const PH_SIDEBAR = (activePage) => '';
 
-    <div class="sidebar-label">Operations</div>
-    <div class="sidebar-nav-item">
-      <a class="sidebar-nav-link ${activePage==='inventory'?'active':''}" href="Inventory.aspx">
-        <i class="bi bi-boxes"></i>Inventory & Alerts
-      </a>
-    </div>
-    <div class="sidebar-nav-item">
-      <a class="sidebar-nav-link ${activePage==='orders'?'active':''}" href="OrderManagement.aspx">
-        <i class="bi bi-bag-check"></i>Order Management
-        <span class="nav-badge">5</span>
-      </a>
-    </div>
-    <div class="sidebar-nav-item">
-      <a class="sidebar-nav-link ${activePage==='rxbilling'?'active':''}" href="PrescriptionBilling.aspx">
-        <i class="bi bi-file-medical-fill"></i>Rx & Billing
-        <span class="nav-badge">3</span>
-      </a>
-    </div>
-
-    <div class="sidebar-label">Account</div>
-    <div class="sidebar-nav-item">
-      <a class="sidebar-nav-link" href="#">
-        <i class="bi bi-person-circle"></i>My Profile
-      </a>
-    </div>
-    <div class="sidebar-nav-item">
-      <a class="sidebar-nav-link" href="../Customer/Login.aspx">
-        <i class="bi bi-box-arrow-right"></i>Logout
-      </a>
-    </div>
-
-    <div class="sidebar-label">Portal Access</div>
-    <div class="sidebar-nav-item">
-      <a class="sidebar-nav-link portal-link" href="../Admin/Dashboard.aspx">
-        <i class="bi bi-shield-lock-fill"></i>Admin Portal
-      </a>
-    </div>
-    <div class="sidebar-nav-item">
-      <a class="sidebar-nav-link portal-link" href="../Default.aspx">
-        <i class="bi bi-shop"></i>Customer Portal
-      </a>
-    </div>
-  </nav>
-  <div class="sidebar-footer"><div class="sidebar-version">MediCare PMS v2.4.1</div></div>
-</aside>
-<div class="sidebar-overlay" id="phOverlay"></div>`;
 
 const PH_HEADER = (title, breadcrumb) => `
 <header class="ph-header">
@@ -81,7 +14,7 @@ const PH_HEADER = (title, breadcrumb) => `
     <div>
       <div class="page-title">${title}</div>
       <ol class="breadcrumb-custom">
-        <li><a href="Dashboard.aspx"><i class="bi bi-house-door me-1"></i>Home</a></li>
+        <li><a href="dashboard.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
         <li><i class="bi bi-chevron-right small"></i></li>
         <li>${breadcrumb}</li>
       </ol>
@@ -107,9 +40,9 @@ const PH_HEADER = (title, breadcrumb) => `
       </div>
       <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius:14px;min-width:200px;border:1px solid var(--gray-200) !important">
         <li><div class="px-3 py-2 border-bottom"><strong style="font-size:.88rem">Dr. Amit Kumar</strong><br><small class="text-muted">amit@medicare.com</small></div></li>
-        <li><a class="dropdown-item py-2" href="#"><i class="bi bi-person me-2 text-primary"></i>My Profile</a></li>
+        <li><a class="dropdown-item py-2" href="profile.html"><i class="bi bi-person me-2 text-primary"></i>My Profile</a></li>
         <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item py-2 text-danger" href="../Customer/Login.aspx"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        <li><a class="dropdown-item py-2 text-danger" href="../Logout.aspx"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
       </ul>
     </div>
   </div>
@@ -122,3 +55,7 @@ window.PH_HEADER  = PH_HEADER;
 document.documentElement.classList.add('layout-locked');
 document.body.classList.add('layout-locked');
 
+/* Auto-init subnav expand/collapse for all pharmacist pages */
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof initSubnav === 'function') initSubnav('phSidebar');
+});

@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site1.master.cs" Inherits="medicare.Site1" %>
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site1.master.cs" Inherits="medicare.Site1" %>
 
 <!DOCTYPE html>
 
@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="<%= ResolveUrl("~/assets/css/main.css") %>" />
     <link rel="stylesheet" href="<%= ResolveUrl("~/assets/css/customer.css") %>" />
+    <link rel="stylesheet" href="<%= ResolveUrl("~/assets/css/admin.css") %>" />
+
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
 </head>
@@ -16,7 +18,9 @@
     <form id="form1" runat="server">
         <div>
 
+            <%--Header --%>
             <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+
                 <!DOCTYPE html>
                 <html lang="en">
                 <head>
@@ -46,6 +50,7 @@
                                 <ul class="navbar-nav mx-auto gap-1">
                                     <li class="nav-item"><a class="nav-link nav-link-custom active" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
                                     <li class="nav-item"><a class="nav-link nav-link-custom" href="customer/medicines.html"><i class="bi bi-capsule me-1"></i>Medicines</a></li>
+                                    <li class="nav-item"><a class="nav-link nav-link-custom" href="customer/prescription.html"><i class="bi bi-file-medical me-1"></i>Prescription</a></li>
                                     <li class="nav-item"><a class="nav-link nav-link-custom" href="customer/orders.html"><i class="bi bi-bag-check me-1"></i>Orders</a></li>
                                     <li class="nav-item"><a class="nav-link nav-link-custom" href="customer/feedback.html"><i class="bi bi-star me-1"></i>Feedback</a></li>
                                 </ul>
@@ -67,7 +72,11 @@
                     </nav>
             </asp:ContentPlaceHolder>
 
+            <%--Body--%>
+
             <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server">
+
+
                 <!-- ═══ HERO SECTION ═══════════════════════════════════════════ -->
                 <section class="hero-section">
                     <div class="container">
@@ -165,15 +174,19 @@
                         const accountArea = document.getElementById('homeAccountArea');
                         if (!accountArea) return;
 
-                        const isLoggedIn = localStorage.getItem('medicare_logged_in') === 'true';
-                        if (!isLoggedIn) {
-                            accountArea.innerHTML = '<a href="customer/register.html" class="btn btn-primary-custom btn-sm px-3 fw-600"><i class="bi bi-person-plus me-1"></i>Register</a>';
+                        const sessionUser = window.sessionUser || '';
+                        if (!sessionUser) {
+                            accountArea.innerHTML = '<a href="<%= ResolveUrl("~/customer/register.aspx") %>" class="btn btn-primary-custom btn-sm px-3 fw-600 me-2"><i class="bi bi-person-plus me-1"></i>Register</a><a href="<%= ResolveUrl("~/customer/login.aspx") %>" class="btn btn-outline-primary btn-sm px-3 fw-600"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>';
                             return;
                         }
 
-                        const userName = localStorage.getItem('medicare_user_name') || 'My Account';
-                        const userEmail = localStorage.getItem('medicare_user_email') || 'user@example.com';
+                        const userEmail = sessionUser;
+                        const userName = userEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                         const initials = userName.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase();
+                        const profileUrl = '<%= ResolveUrl("~/customer/profile.aspx") %>';
+                        const ordersUrl = '<%= ResolveUrl("~/customer/orders.aspx") %>';
+                        const prescriptionUrl = '<%= ResolveUrl("~/customer/prescription.aspx") %>';
+                        const logoutUrl = '<%= ResolveUrl("~/Logout.aspx") %>';
 
                         accountArea.innerHTML = `
     <div class="dropdown">
@@ -183,22 +196,13 @@
       </button>
       <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius:14px;min-width:210px;border:1px solid var(--gray-200) !important">
         <li><div class="px-3 py-2 border-bottom"><strong style="font-size:.9rem">${userName}</strong><br><small class="text-muted">${userEmail}</small></div></li>
-        <li><a class="dropdown-item py-2" href="customer/profile.html"><i class="bi bi-person me-2 text-primary"></i>My Profile</a></li>
-        <li><a class="dropdown-item py-2" href="customer/orders.html"><i class="bi bi-bag me-2 text-primary"></i>My Orders</a></li>
-        <li><a class="dropdown-item py-2" href="customer/prescription.html"><i class="bi bi-file-medical me-2 text-primary"></i>Prescriptions</a></li>
+        <li><a class="dropdown-item py-2" href="${profileUrl}"><i class="bi bi-person me-2 text-primary"></i>My Profile</a></li>
+        <li><a class="dropdown-item py-2" href="${ordersUrl}"><i class="bi bi-bag me-2 text-primary"></i>My Orders</a></li>
+        <li><a class="dropdown-item py-2" href="${prescriptionUrl}"><i class="bi bi-file-medical me-2 text-primary"></i>Prescriptions</a></li>
         <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item py-2 text-danger" href="customer/login.html" id="logoutLink"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        <li><a class="dropdown-item py-2 text-danger" href="${logoutUrl}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
       </ul>
     </div>`;
-
-                        const logoutLink = document.getElementById('logoutLink');
-                        if (logoutLink) {
-                            logoutLink.addEventListener('click', () => {
-                                localStorage.removeItem('medicare_logged_in');
-                                localStorage.removeItem('medicare_user_name');
-                                localStorage.removeItem('medicare_user_email');
-                            });
-                        }
                     })();
                 </script>
 
@@ -437,9 +441,14 @@
                     </div>
                 </section>
 
+
             </asp:ContentPlaceHolder>
 
+
+            <%--Footer--%>
+
             <asp:ContentPlaceHolder ID="ContentPlaceHolder3" runat="server">
+
 
                 <!-- ═══ FOOTER ═══════════════════════════════════════════════════ -->
                 <footer class="customer-footer">
@@ -472,9 +481,9 @@
                             <div class="col-6 col-lg-2">
                                 <h6 class="footer-heading">Support</h6>
                                 <ul class="footer-links">
-                                    <li><a href="#">About Us</a></li>
-                                    <li><a href="#">Contact Us</a></li>
-                                    <li><a href="#">FAQs</a></li>
+                                    <li><a href="customer/about.html">About Us</a></li>
+                                    <li><a href="customer/contact.html">Contact Us</a></li>
+                                    <li><a href="customer/faq.html">FAQs</a></li>
                                     <li><a href="#">Privacy Policy</a></li>
                                     <li><a href="#">Terms of Service</a></li>
                                 </ul>
@@ -610,7 +619,11 @@
 </body>
 </html>
 
+
 </asp:ContentPlaceHolder>
+
+
+
         </div>
     </form>
 </body>
