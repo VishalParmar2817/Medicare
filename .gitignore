@@ -1,0 +1,8 @@
+﻿.vs/
+**/.vs/
+**/obj/
+**/*.user
+**/*.suo
+**/bin/*.pdb
+**/bin/medicare.dll
+**/bin/medicare.dll.config
