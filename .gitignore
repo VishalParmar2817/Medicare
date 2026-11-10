@@ -1,8 +1,61 @@
-﻿.vs/
+## ============================================================================
+## Visual Studio / ASP.NET Web Forms .gitignore
+## ============================================================================
+
+# Build results and binaries
+[Bb]in/
+[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
+*.dll
+*.pdb
+*.exe
+*.log
+*.tlog
+
+# Visual Studio temporary files, caches, and user-specific files
+.vs/
 **/.vs/
-**/obj/
-**/*.user
-**/*.suo
-**/bin/*.pdb
-**/bin/medicare.dll
-**/bin/medicare.dll.config
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+*.VisualState.xml
+*.ide/
+*.ide.json
+*.dtbcache.json
+
+# NuGet packages (restore via 'nuget restore' or VS package restore)
+packages/*
+!packages/repositories.config
+
+# SQL Server database files (use App_Data/Database/MediCareDB.sql for schema & data)
+*.mdf
+*.ldf
+*.ndf
+
+# Roslyn compiler binaries
+bin/roslyn/
+**/bin/roslyn/
+
+# IIS Express and temporary web files
+.vs/config/applicationhost.config
+.vs/**/config/applicationhost.config
+
+# Windows / OS temporary files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# ReSharper / JetBrains / VS Code caches
+_ReSharper*/
+*.ReSharper
+.vscode/
+
+# Temporary / Auto-saved files
+*~
+*.bak
+*.tmp
+*.temp
